@@ -184,8 +184,8 @@ function verify_installation() {
 			throw new DatabaseException();
 		}
 
-		mysql_query("SELECT value FROM {$CONFIG->dbprefix}datalists WHERE name = 'installed'", $dblink);
-		if (mysql_errno($dblink) > 0) {
+		$dblink->query("SELECT value FROM {$CONFIG->dbprefix}datalists WHERE name = 'installed'");
+		if ($dblink->getErrorCode() > 0) {
 			throw new DatabaseException();
 		}
 

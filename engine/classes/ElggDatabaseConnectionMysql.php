@@ -3,12 +3,16 @@
  * @author Paweł Sroka (pawel.sroka@vazco.eu)
  */
 class ElggDatabaseConnectionMysql extends ElggDatabaseConnection {
+	/**
+	 * Connection object.
+	 * @var mysqli
+	 */
 	private $_connection;
 	/**
 	 * @var mysqli_result
 	 */
 	private $_last_result;
-	private $RESULT_MODE = 'MYSQLI_STORE_RESULT';//MYSQLI_USE_RESULT
+	private $RESULT_MODE = MYSQLI_STORE_RESULT;//MYSQLI_USE_RESULT
 	
 	public function connect($dbhost, $dbuser, $dbpass, $dbname) {
 		$this->_connection = new mysqli($dbhost, $dbuser, $dbpass);
@@ -17,7 +21,7 @@ class ElggDatabaseConnectionMysql extends ElggDatabaseConnection {
 			$msg = elgg_echo('DatabaseException:WrongCredentials', array($dbuser, $dbhost, "****"));
 			throw new DatabaseException($msg);
 		}
-		if ($this->_connection->select_db($dbname)) {
+		if (!$this->_connection->select_db($dbname)) {
 			$msg = elgg_echo('DatabaseException:NoConnect', array($dbname));
 			throw new DatabaseException($msg);
 		}
@@ -26,8 +30,20 @@ class ElggDatabaseConnectionMysql extends ElggDatabaseConnection {
 		return $this;
 	}
 	
+	public function getVersion($humanreadable = false) {
+		if ($humanreadable) {
+			return $this->_connection->server_info;
+		} else {
+			return $this->_connection->server_version;
+		}
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ElggDatabaseConnection::query()
+	 */
 	public function query($query) {
-		return $_last_result = $this->_connection->query($query, $this->RESULT_MODE);
+		return $this->_last_result = $this->_connection->query($query, $this->RESULT_MODE);
 	}
 	
 	public function close() {
@@ -62,6 +78,10 @@ class ElggDatabaseConnectionMysql extends ElggDatabaseConnection {
 	
 	public function fetchAssoc() {
 		return $this->_last_result->fetch_assoc();
+	}
+	
+	public function fetchArray($resulttype=null) {
+		return $this->_last_result->fetch_array($resulttype);
 	}
 	
 	public function getResultRowsCount() {

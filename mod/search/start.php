@@ -35,8 +35,8 @@ function search_init() {
 	// can't use get_data() here because some servers don't have these globals set,
 	// which throws a db exception.
 	$dblink = get_db_link('read');
-	$r = mysql_query('SELECT @@ft_min_word_len as min, @@ft_max_word_len as max', $dblink);
-	if ($r && ($word_lens = mysql_fetch_assoc($r))) {
+	$r = $dblink->query('SELECT @@ft_min_word_len as min, @@ft_max_word_len as max');
+	if ($r && ($word_lens = $dblink->fetchAssoc())) {
 		$CONFIG->search_info['min_chars'] = $word_lens['min'];
 		$CONFIG->search_info['max_chars'] = $word_lens['max'];
 	} else {

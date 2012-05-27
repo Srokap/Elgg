@@ -75,53 +75,7 @@ $dbcalls = 0;
  * @access private
  */
 function establish_db_link($dblinkname = "readwrite") {
-	// Get configuration, and globalise database link
-	global $CONFIG, $dblink, $DB_QUERY_CACHE, $dbcalls;
-
-	if ($dblinkname != "readwrite" && isset($CONFIG->db[$dblinkname])) {
-		if (is_array($CONFIG->db[$dblinkname])) {
-			$index = rand(0, sizeof($CONFIG->db[$dblinkname]));
-			$dbhost = $CONFIG->db[$dblinkname][$index]->dbhost;
-			$dbuser = $CONFIG->db[$dblinkname][$index]->dbuser;
-			$dbpass = $CONFIG->db[$dblinkname][$index]->dbpass;
-			$dbname = $CONFIG->db[$dblinkname][$index]->dbname;
-		} else {
-			$dbhost = $CONFIG->db[$dblinkname]->dbhost;
-			$dbuser = $CONFIG->db[$dblinkname]->dbuser;
-			$dbpass = $CONFIG->db[$dblinkname]->dbpass;
-			$dbname = $CONFIG->db[$dblinkname]->dbname;
-		}
-	} else {
-		$dbhost = $CONFIG->dbhost;
-		$dbuser = $CONFIG->dbuser;
-		$dbpass = $CONFIG->dbpass;
-		$dbname = $CONFIG->dbname;
-	}
-
-	// Connect to database
-	if (!$dblink[$dblinkname] = mysql_connect($dbhost, $dbuser, $dbpass, true)) {
-		$msg = elgg_echo('DatabaseException:WrongCredentials',
-				array($dbuser, $dbhost, "****"));
-		throw new DatabaseException($msg);
-	}
-
-	if (!mysql_select_db($dbname, $dblink[$dblinkname])) {
-		$msg = elgg_echo('DatabaseException:NoConnect', array($dbname));
-		throw new DatabaseException($msg);
-	}
-
-	// Set DB for UTF8
-	mysql_query("SET NAMES utf8");
-
-	$db_cache_off = FALSE;
-	if (isset($CONFIG->db_disable_query_cache)) {
-		$db_cache_off = $CONFIG->db_disable_query_cache;
-	}
-
-	// Set up cache if global not initialized and query cache not turned off
-	if ((!$DB_QUERY_CACHE) && (!$db_cache_off)) {
-		$DB_QUERY_CACHE = new ElggStaticVariableCache('db_query_cache');
-	}
+	return ElggDatabaseConnection::getConnection($dblinkname);
 }
 
 /**
@@ -134,14 +88,7 @@ function establish_db_link($dblinkname = "readwrite") {
  * @access private
  */
 function setup_db_connections() {
-	global $CONFIG, $dblink;
-
-	if (!empty($CONFIG->db->split)) {
-		establish_db_link('read');
-		establish_db_link('write');
-	} else {
-		establish_db_link('readwrite');
-	}
+	return ElggDatabaseConnection::setupConnections();
 }
 
 /**
@@ -201,33 +148,20 @@ function db_delayedexecution_shutdown_hook() {
  * @access private
  */
 function get_db_link($dblinktype) {
-	global $dblink;
-
-	if (isset($dblink[$dblinktype])) {
-		return $dblink[$dblinktype];
-	} else if (isset($dblink['readwrite'])) {
-		return $dblink['readwrite'];
-	} else {
-		setup_db_connections();
-		return get_db_link($dblinktype);
-	}
+	return ElggDatabaseConnection::getConnection($dblinktype);
 }
 
 /**
  * Execute an EXPLAIN for $query.
  *
  * @param str   $query The query to explain
- * @param mixed $link  The database link resource to user.
+ * @param ElggDatabaseConnection $link  The database link resource to user.
  *
  * @return mixed An object of the query's result, or FALSE
  * @access private
  */
 function explain_query($query, $link) {
-	if ($result = execute_query("explain " . $query, $link)) {
-		return mysql_fetch_object($result);
-	}
-
-	return FALSE;
+	return $link->explainQuery($query);
 }
 
 /**
@@ -240,28 +174,14 @@ function explain_query($query, $link) {
  * {@link $dbcalls} is incremented and the query is saved into the {@link $DB_QUERY_CACHE}.
  *
  * @param string $query  The query
- * @param link   $dblink The DB link
+ * @param ElggDatabaseConnection   $dblink The DB link
  *
  * @return The result of mysql_query()
  * @throws DatabaseException
  * @access private
  */
 function execute_query($query, $dblink) {
-	global $CONFIG, $dbcalls;
-
-	if ($query == NULL) {
-		throw new DatabaseException(elgg_echo('DatabaseException:InvalidQuery'));
-	}
-
-	$dbcalls++;
-
-	$result = mysql_query($query, $dblink);
-
-	if (mysql_errno($dblink)) {
-		throw new DatabaseException(mysql_error($dblink) . "\n\n QUERY: " . $query);
-	}
-
-	return $result;
+	return $dblink->executeQuery($query);
 }
 
 /**
@@ -399,16 +319,16 @@ function elgg_query_runner($query, $callback = null, $single = false) {
 		}
 	}
 
-	$dblink = get_db_link('read');
+	$dblink = ElggDatabaseConnection::getConnection('read');
 	$return = array();
 
-	if ($result = execute_query("$query", $dblink)) {
+	if ($result = $dblink->executeQuery("$query")) {
 
 		// test for callback once instead of on each iteration.
 		// @todo check profiling to see if this needs to be broken out into
 		// explicit cases instead of checking in the interation.
 		$is_callable = is_callable($callback);
-		while ($row = mysql_fetch_object($result)) {
+		while ($row = $result->fetch_object()) {
 			if ($is_callable) {
 				$row = $callback($row);
 			}
@@ -420,6 +340,7 @@ function elgg_query_runner($query, $callback = null, $single = false) {
 				$return[] = $row;
 			}
 		}
+		$result->close();
 	}
 
 	if (empty($return)) {
@@ -447,24 +368,7 @@ function elgg_query_runner($query, $callback = null, $single = false) {
  * @access private
  */
 function insert_data($query) {
-	global $CONFIG, $DB_QUERY_CACHE;
-
-	elgg_log("DB query $query", 'NOTICE');
-	
-	$dblink = get_db_link('write');
-
-	// Invalidate query cache
-	if ($DB_QUERY_CACHE) {
-		$DB_QUERY_CACHE->clear();
-	}
-
-	elgg_log("Query cache invalidated", 'NOTICE');
-
-	if (execute_query("$query", $dblink)) {
-		return mysql_insert_id($dblink);
-	}
-
-	return FALSE;
+	return ElggDatabaseConnection::insertData($query);
 }
 
 /**
@@ -478,23 +382,7 @@ function insert_data($query) {
  * @access private
  */
 function update_data($query) {
-	global $CONFIG, $DB_QUERY_CACHE;
-
-	elgg_log("DB query $query", 'NOTICE');
-
-	$dblink = get_db_link('write');
-
-	// Invalidate query cache
-	if ($DB_QUERY_CACHE) {
-		$DB_QUERY_CACHE->clear();
-		elgg_log("Query cache invalidated", 'NOTICE');
-	}
-
-	if (execute_query("$query", $dblink)) {
-		return TRUE;
-	}
-
-	return FALSE;
+	return ElggDatabaseConnection::updateData($query);
 }
 
 /**
@@ -508,23 +396,7 @@ function update_data($query) {
  * @access private
  */
 function delete_data($query) {
-	global $CONFIG, $DB_QUERY_CACHE;
-
-	elgg_log("DB query $query", 'NOTICE');
-
-	$dblink = get_db_link('write');
-
-	// Invalidate query cache
-	if ($DB_QUERY_CACHE) {
-		$DB_QUERY_CACHE->clear();
-		elgg_log("Query cache invalidated", 'NOTICE');
-	}
-
-	if (execute_query("$query", $dblink)) {
-		return mysql_affected_rows($dblink);
-	}
-
-	return FALSE;
+	return ElggDatabaseConnection::deleteData($query);
 }
 
 
@@ -587,13 +459,13 @@ function optimize_table($table) {
 /**
  * Get the last database error for a particular database link
  *
- * @param resource $dblink The DB link
+ * @param ElggDatabaseConnection $dblink The DB link
  *
  * @return string Database error message
  * @access private
  */
 function get_db_error($dblink) {
-	return mysql_error($dblink);
+	$dblink->getErrorMessage();
 }
 
 /**
@@ -663,8 +535,7 @@ function run_sql_script($scriptlocation) {
  * @access private
  */
 function elgg_format_query($query) {
-	// remove newlines and extra spaces so logs are easier to read
-	return preg_replace('/\s\s+/', ' ', $query);
+	return ElggDatabaseConnection::formatQuery($query);
 }
 
 /**
@@ -676,13 +547,8 @@ function elgg_format_query($query) {
  * @return string The escaped string
  */
 function sanitise_string_special($string, $extra_escapeable = '') {
-	$string = sanitise_string($string);
-
-	for ($n = 0; $n < strlen($extra_escapeable); $n++) {
-		$string = str_replace($extra_escapeable[$n], "\\" . $extra_escapeable[$n], $string);
-	}
-
-	return $string;
+	$dblink = ElggDatabaseConnection::getConnection('write');
+	return $dblink->sanitiseStringSpecial($string, $extra_escapeable);
 }
 
 /**
@@ -693,9 +559,10 @@ function sanitise_string_special($string, $extra_escapeable = '') {
  * @return string Sanitised string
  */
 function sanitise_string($string) {
+	$dblink = ElggDatabaseConnection::getConnection('write');
 	// @todo does this really need the trim?
 	// there are times when you might want trailing / preceeding white space.
-	return mysql_real_escape_string(trim($string));
+	return $dblink->sanitiseString(trim($string));
 }
 
 /**
@@ -717,15 +584,8 @@ function sanitize_string($string) {
  * @return int
  */
 function sanitise_int($int, $signed = true) {
-	$int = (int) $int;
-
-	if ($signed === false) {
-		if ($int < 0) {
-			$int = 0;
-		}
-	}
-
-	return (int) $int;
+	$dblink = ElggDatabaseConnection::getConnection('write');
+	return $dblink->sanitiseInt($int, $signed);
 }
 
 /**
@@ -737,7 +597,8 @@ function sanitise_int($int, $signed = true) {
  * @return int
  */
 function sanitize_int($int, $signed = true) {
-	return sanitise_int($int, $signed);
+	$dblink = ElggDatabaseConnection::getConnection('write');
+	return $dblink->sanitiseInt($int, $signed);
 }
 
 /**

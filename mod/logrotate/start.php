@@ -98,16 +98,17 @@ function log_browser_delete_log($time_of_delete) {
 
 	$ts = $now - $offset;
 
-	$FLAG = 1;      
-	$result = mysql_query("SHOW TABLES like '{$CONFIG->dbprefix}system_log_%'");
-	while ($showtablerow = mysql_fetch_array($result)) {
+	$FLAG = 1;
+	$dblink = ElggDatabaseConnection::getConnection('write'); 
+	$result = $dblink->query("SHOW TABLES like '{$CONFIG->dbprefix}system_log_%'");
+	while ($showtablerow = $result->fetch_array()) {
 		//To obtain time of archival
 		$log_time = explode("{$CONFIG->dbprefix}system_log_", $showtablerow[0]);
 		if ($log_time < $ts) {
 			//If the time of archival is before the required offset then delete
-			if (!mysql_query("DROP TABLE $showtablerow[0]")) {
+			if (!$dblink->query("DROP TABLE $showtablerow[0]")) {
 				$FLAG = 0;
-			}	
+			}
 		}
 	}
 
