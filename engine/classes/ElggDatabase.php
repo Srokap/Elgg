@@ -1,8 +1,10 @@
 <?php
 /**
- * @author Paweł Sroka (pawel.sroka@vazco.eu)
+ * Base class for database connections, as well as helper class with database API for elgg.
  */
-abstract class ElggDatabaseConnection {
+abstract class ElggDatabase implements 
+	DatabaseAccess
+{
 	
 	/**
 	 * Establish a connection to the database servser
@@ -38,7 +40,7 @@ abstract class ElggDatabaseConnection {
 			$dbname = $CONFIG->dbname;
 		}
 		$dbType = isset($CONFIG->dbtype) ? $CONFIG->dbtype : 'mysql';
-		$dbClassName = 'ElggDatabaseConnection'.elgg_strtoupper($dbType[0]).substr($dbType, 1);//make it camelcase
+		$dbClassName = 'ElggDatabase'.elgg_strtoupper($dbType[0]).substr($dbType, 1);//make it camelcase
 		// Connect to database
 		$connection = new $dbClassName();
 		$connection->connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -83,7 +85,7 @@ abstract class ElggDatabaseConnection {
 	 *
 	 * @param string $dblinktype The type of link we want: "read", "write" or "readwrite".
 	 *
-	 * @return ElggDatabaseConnection
+	 * @return ElggDatabase
 	 * @access private
 	 */
 	public static function getConnection($dblinktype) {
@@ -253,7 +255,7 @@ abstract class ElggDatabaseConnection {
 				return $cached_query;
 			}
 		}
-		$dblink = ElggDatabaseConnection::getConnection('read');
+		$dblink = ElggDatabase::getConnection('read');
 		$return = array();
 		if ($result = $dblink->executeQuery("$query")) {
 			// test for callback once instead of on each iteration.
@@ -303,7 +305,7 @@ abstract class ElggDatabaseConnection {
 		if (!isset($DB_DELAYED_QUERIES)) {
 			$DB_DELAYED_QUERIES = array();
 		}
-		if (!($dblink instanceof ElggDatabaseConnection) && $dblink != 'read' && $dblink != 'write') {
+		if (!($dblink instanceof ElggDatabase) && $dblink != 'read' && $dblink != 'write') {
 			return false;
 		}
 		// Construct delayed query
@@ -324,7 +326,7 @@ abstract class ElggDatabaseConnection {
 	 *
 	 * @return true
 	 * @uses execute_delayed_query()
-	 * @uses ElggDatabaseConnection::getConnection()
+	 * @uses ElggDatabase::getConnection()
 	 * @access private
 	 */
 	public static function executeDelayedWriteQuery($query, $handler = "") {
@@ -339,7 +341,7 @@ abstract class ElggDatabaseConnection {
 	 *
 	 * @return true
 	 * @uses execute_delayed_query()
-	 * @uses ElggDatabaseConnection::getConnection()
+	 * @uses ElggDatabase::getConnection()
 	 * @access private
 	 */
 	public static function executeDelayedReadQuery($query, $handler = "") {
@@ -360,7 +362,7 @@ abstract class ElggDatabaseConnection {
 				$link = $query_details['l'];
 	
 				if ($link == 'read' || $link == 'write') {
-					$link = ElggDatabaseConnection::getConnection($link);
+					$link = ElggDatabase::getConnection($link);
 				} elseif (!is_resource($link)) {
 					elgg_log("Link for delayed query not valid resource or db_link type. Query: {$query_details['q']}", 'WARNING');
 				}
@@ -400,7 +402,7 @@ abstract class ElggDatabaseConnection {
 	 * {@link $dbcalls} is incremented and the query is saved into the {@link $DB_QUERY_CACHE}.
 	 *
 	 * @param string $query  The query
-	 * @param ElggDatabaseConnection   $dblink The DB link
+	 * @param ElggDatabase   $dblink The DB link
 	 *
 	 * @return The result of mysql_query()
 	 * @throws DatabaseException
@@ -423,7 +425,7 @@ abstract class ElggDatabaseConnection {
 	 * Execute an EXPLAIN for $query.
 	 *
 	 * @param str   $query The query to explain
-	 * @param ElggDatabaseConnection $link  The database link resource to user.
+	 * @param ElggDatabase $link  The database link resource to user.
 	 *
 	 * @return mixed An object of the query's result, or FALSE
 	 * @access private
@@ -435,25 +437,6 @@ abstract class ElggDatabaseConnection {
 		return FALSE;
 	}
 		
-	public abstract function connect($sqlserver, $sqluser, $sqlpassword, $database);
-	public abstract function close();
-	
-	/**
-	 * @param unknown_type $query
-	 * @return mysqli_result
-	 */
-	public abstract function query($query);
-	
-	public abstract function getVersion($humanreadable = false);
-	
-	public abstract function getErrorCode();
-	public abstract function getErrorMessage();
-	
-	public abstract function getInsertId();
-	public abstract function getAffectedRowsCount();
-	
-	public abstract function sanitiseString($string);
-	
 	/**
 	 * Sanitise a string for database use, but with the option of escaping extra characters.
 	 *
@@ -486,11 +469,4 @@ abstract class ElggDatabaseConnection {
 		}
 		return (int) $int;
 	}
-	
-	public abstract function fetchObject();
-	public abstract function fetchAssoc();
-	public abstract function fetchArray($resulttype=null);
-	public abstract function getResultRowsCount();
-	public abstract function freeResult();
 }
-?>

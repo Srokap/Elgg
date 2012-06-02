@@ -179,7 +179,7 @@ function verify_installation() {
 	}
 
 	try {
-		$dblink = ElggDatabaseConnection::getConnection('read');
+		$dblink = ElggDatabase::getConnection('read');
 		if (!$dblink) {
 			throw new DatabaseException();
 		}

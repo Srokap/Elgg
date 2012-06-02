@@ -46,7 +46,7 @@ $DB_DELAYED_QUERIES = array();
  * Database connection resources.
  *
  * Each database link created with establish_db_link($name) is stored in
- * $dblink as $dblink[$name] => resource.  Use ElggDatabaseConnection::getConnection($name) to retrieve it.
+ * $dblink as $dblink[$name] => resource.  Use ElggDatabase::getConnection($name) to retrieve it.
  *
  * @global array $dblink
  */
@@ -75,7 +75,7 @@ $dbcalls = 0;
  * @access private
  */
 function establish_db_link($dblinkname = "readwrite") {
-	return ElggDatabaseConnection::getConnection($dblinkname);
+	return ElggDatabase::getConnection($dblinkname);
 }
 
 /**
@@ -88,7 +88,7 @@ function establish_db_link($dblinkname = "readwrite") {
  * @access private
  */
 function setup_db_connections() {
-	return ElggDatabaseConnection::setupConnections();
+	return ElggDatabase::setupConnections();
 }
 
 /**
@@ -104,14 +104,14 @@ function setup_db_connections() {
  * @access private
  */
 function get_db_link($dblinktype) {
-	return ElggDatabaseConnection::getConnection($dblinktype);
+	return ElggDatabase::getConnection($dblinktype);
 }
 
 /**
  * Execute an EXPLAIN for $query.
  *
  * @param str   $query The query to explain
- * @param ElggDatabaseConnection $link  The database link resource to user.
+ * @param ElggDatabase $link  The database link resource to user.
  *
  * @return mixed An object of the query's result, or FALSE
  * @access private
@@ -130,7 +130,7 @@ function explain_query($query, $link) {
  * {@link $dbcalls} is incremented and the query is saved into the {@link $DB_QUERY_CACHE}.
  *
  * @param string $query  The query
- * @param ElggDatabaseConnection   $dblink The DB link
+ * @param ElggDatabase   $dblink The DB link
  *
  * @return The result of mysql_query()
  * @throws DatabaseException
@@ -154,7 +154,7 @@ function execute_query($query, $dblink) {
  * @access private
  */
 function execute_delayed_query($query, $dblink, $handler = "") {
-	return ElggDatabaseConnection::executeDelayedQuery($query, $dblink, $handler);
+	return ElggDatabase::executeDelayedQuery($query, $dblink, $handler);
 }
 
 /**
@@ -165,11 +165,11 @@ function execute_delayed_query($query, $dblink, $handler = "") {
  *
  * @return true
  * @uses execute_delayed_query()
- * @uses ElggDatabaseConnection::getConnection()
+ * @uses ElggDatabase::getConnection()
  * @access private
  */
 function execute_delayed_write_query($query, $handler = "") {
-	return ElggDatabaseConnection::executeDelayedWriteQuery($query, $handler);
+	return ElggDatabase::executeDelayedWriteQuery($query, $handler);
 }
 
 /**
@@ -180,11 +180,11 @@ function execute_delayed_write_query($query, $handler = "") {
  *
  * @return true
  * @uses execute_delayed_query()
- * @uses ElggDatabaseConnection::getConnection()
+ * @uses ElggDatabase::getConnection()
  * @access private
  */
 function execute_delayed_read_query($query, $handler = "") {
-	return ElggDatabaseConnection::executeDelayedReadQuery($query, $handler);
+	return ElggDatabase::executeDelayedReadQuery($query, $handler);
 }
 
 /**
@@ -204,7 +204,7 @@ function execute_delayed_read_query($query, $handler = "") {
  * @access private
  */
 function get_data($query, $callback = "") {
-	return ElggDatabaseConnection::getData($query, $callback);
+	return ElggDatabase::getData($query, $callback);
 }
 
 /**
@@ -221,7 +221,7 @@ function get_data($query, $callback = "") {
  * @access private
  */
 function get_data_row($query, $callback = "") {
-	return ElggDatabaseConnection::getDataRow($query, $callback, true);
+	return ElggDatabase::getDataRow($query, $callback, true);
 }
 
 /**
@@ -240,7 +240,7 @@ function get_data_row($query, $callback = "") {
  * @access private
  */
 function elgg_query_runner($query, $callback = null, $single = false) {
-	return ElggDatabaseConnection::queryRunner($query, $callback, $single);
+	return ElggDatabase::queryRunner($query, $callback, $single);
 }
 
 /**
@@ -255,7 +255,7 @@ function elgg_query_runner($query, $callback = null, $single = false) {
  * @access private
  */
 function insert_data($query) {
-	return ElggDatabaseConnection::insertData($query);
+	return ElggDatabase::insertData($query);
 }
 
 /**
@@ -269,7 +269,7 @@ function insert_data($query) {
  * @access private
  */
 function update_data($query) {
-	return ElggDatabaseConnection::updateData($query);
+	return ElggDatabase::updateData($query);
 }
 
 /**
@@ -283,7 +283,7 @@ function update_data($query) {
  * @access private
  */
 function delete_data($query) {
-	return ElggDatabaseConnection::deleteData($query);
+	return ElggDatabase::deleteData($query);
 }
 
 
@@ -304,7 +304,7 @@ function get_db_tables() {
 	}
 
 	try{
-		$result = ElggDatabaseConnection::getData("show tables like '" . $CONFIG->dbprefix . "%'");
+		$result = ElggDatabase::getData("show tables like '" . $CONFIG->dbprefix . "%'");
 	} catch (DatabaseException $d) {
 		// Likely we can't handle an exception here, so just return false.
 		return FALSE;
@@ -340,13 +340,13 @@ function get_db_tables() {
  */
 function optimize_table($table) {
 	$table = sanitise_string($table);
-	return ElggDatabaseConnection::updateData("optimize table $table");
+	return ElggDatabase::updateData("optimize table $table");
 }
 
 /**
  * Get the last database error for a particular database link
  *
- * @param ElggDatabaseConnection $dblink The DB link
+ * @param ElggDatabase $dblink The DB link
  *
  * @return string Database error message
  * @access private
@@ -393,7 +393,7 @@ function run_sql_script($scriptlocation) {
 			$statement = str_replace("prefix_", $CONFIG->dbprefix, $statement);
 			if (!empty($statement)) {
 				try {
-					$result = ElggDatabaseConnection::updateData($statement);
+					$result = ElggDatabase::updateData($statement);
 				} catch (DatabaseException $e) {
 					$errors[] = $e->getMessage();
 				}
@@ -422,7 +422,7 @@ function run_sql_script($scriptlocation) {
  * @access private
  */
 function elgg_format_query($query) {
-	return ElggDatabaseConnection::formatQuery($query);
+	return ElggDatabase::formatQuery($query);
 }
 
 /**
@@ -434,7 +434,7 @@ function elgg_format_query($query) {
  * @return string The escaped string
  */
 function sanitise_string_special($string, $extra_escapeable = '') {
-	$dblink = ElggDatabaseConnection::getConnection('write');
+	$dblink = ElggDatabase::getConnection('write');
 	return $dblink->sanitiseStringSpecial($string, $extra_escapeable);
 }
 
@@ -446,7 +446,7 @@ function sanitise_string_special($string, $extra_escapeable = '') {
  * @return string Sanitised string
  */
 function sanitise_string($string) {
-	$dblink = ElggDatabaseConnection::getConnection('write');
+	$dblink = ElggDatabase::getConnection('write');
 	// @todo does this really need the trim?
 	// there are times when you might want trailing / preceeding white space.
 	return $dblink->sanitiseString(trim($string));
@@ -471,7 +471,7 @@ function sanitize_string($string) {
  * @return int
  */
 function sanitise_int($int, $signed = true) {
-	$dblink = ElggDatabaseConnection::getConnection('write');
+	$dblink = ElggDatabase::getConnection('write');
 	return $dblink->sanitiseInt($int, $signed);
 }
 
@@ -484,7 +484,7 @@ function sanitise_int($int, $signed = true) {
  * @return int
  */
 function sanitize_int($int, $signed = true) {
-	$dblink = ElggDatabaseConnection::getConnection('write');
+	$dblink = ElggDatabase::getConnection('write');
 	return $dblink->sanitiseInt($int, $signed);
 }
 
@@ -494,8 +494,8 @@ function sanitize_int($int, $signed = true) {
  * @access private
  */
 function init_db() {
-	register_shutdown_function(array('ElggDatabaseConnection', 'delayedExecutionShutdownHook'));
-	register_shutdown_function(array('ElggDatabaseConnection', 'profilingShutdownHook'));
+	register_shutdown_function(array('ElggDatabase', 'delayedExecutionShutdownHook'));
+	register_shutdown_function(array('ElggDatabase', 'profilingShutdownHook'));
 }
 
 elgg_register_event_handler('init', 'system', 'init_db');

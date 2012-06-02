@@ -172,7 +172,7 @@ class ElggCoreRegressionBugsTest extends ElggCoreUnitTest {
 
 		$q = 'SELECT 1 as test';
 
-		$links = array('read', 'write', ElggDatabaseConnection::getConnection('read'), ElggDatabaseConnection::getConnection('write'));
+		$links = array('read', 'write', ElggDatabase::getConnection('read'), ElggDatabase::getConnection('write'));
 
 		foreach ($links as $link) {
 			$DB_DELAYED_QUERIES = array();

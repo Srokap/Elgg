@@ -99,7 +99,7 @@ function log_browser_delete_log($time_of_delete) {
 	$ts = $now - $offset;
 
 	$FLAG = 1;
-	$dblink = ElggDatabaseConnection::getConnection('write'); 
+	$dblink = ElggDatabase::getConnection('write'); 
 	$result = $dblink->query("SHOW TABLES like '{$CONFIG->dbprefix}system_log_%'");
 	while ($showtablerow = $result->fetch_array()) {
 		//To obtain time of archival
