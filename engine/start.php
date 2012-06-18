@@ -78,7 +78,7 @@ $lib_files = array(
 	'private_settings.php', 'relationships.php', 'river.php', 'sessions.php',
 	'sites.php', 'statistics.php', 'system_log.php', 'tags.php',
 	'user_settings.php', 'users.php', 'upgrade.php', 'views.php',
-	'web_services.php', 'widgets.php', 'xml.php',
+	'web_services.php', 'widgets.php', 'xml.php', 'zend.php',
 	
 	// backward compatibility
 	'deprecated-1.7.php', 'deprecated-1.8.php', 'deprecated-1.9.php',

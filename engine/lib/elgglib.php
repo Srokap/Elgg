@@ -33,15 +33,28 @@ function _elgg_autoload($class) {
  * Need to be named MyClass.php
  *
  * @param string $dir The dir to look in
+ * @param array $options 
  *
  * @return void
  * @since 1.8.0
  */
-function elgg_register_classes($dir) {
+function elgg_register_classes($dir, $options=array()) {
+	$prefix = elgg_extract('prefix', $options, '');
+	$recursively = elgg_extract('recursively', $options, false);
+	$glue = elgg_extract('glue', $options, '');
+	
 	$classes = elgg_get_file_list($dir, array(), array(), array('.php'));
 
 	foreach ($classes as $class) {
-		elgg_register_class(basename($class, '.php'), $class);
+		elgg_register_class($prefix.$glue.basename($class, '.php'), $class);
+	}
+	if($recursively) {
+		$dirs = elgg_get_dir_list($dir, array(), array());
+		foreach($dirs as $subdir) {
+			$params = $options;
+			$params['prefix'] .= $glue.basename($subdir);
+			elgg_register_classes($subdir, $params);
+		}
 	}
 }
 
@@ -452,8 +465,7 @@ function elgg_bootstrap_externals_data_structure($type) {
  *
  * @return array Filenames in $directory, in the form $directory/filename.
  */
-function elgg_get_file_list($directory, $exceptions = array(), $list = array(),
-$extensions = NULL) {
+function elgg_get_file_list($directory, $exceptions = array(), $list = array(), $extensions = NULL) {
 
 	$directory = sanitise_filepath($directory);
 	if ($handle = opendir($directory)) {
@@ -473,6 +485,32 @@ $extensions = NULL) {
 		closedir($handle);
 	}
 
+	return $list;
+}
+
+/**
+ * Returns a list of directories in $directory.
+ *
+ * Only returns directories.
+ *
+ * @param string $directory  Directory to look in
+ * @param array  $exceptions Array of filenames to ignore
+ * @param array  $list       Array of files to append to
+ *
+ * @return array Directory names in $directory, in the form $directory/dirname.
+ */
+function elgg_get_dir_list($directory, $exceptions = array(), $list = array()) {
+
+	$directory = sanitise_filepath($directory);
+	if ($handle = opendir($directory)) {
+		while (($dir = readdir($handle)) !== FALSE) {
+			if (!is_dir($directory . $dir) || $dir[0]=='.' || in_array($dir, $exceptions)) {
+				continue;
+			}
+			$list[] = $directory . $dir;
+		}
+		closedir($handle);
+	}
 	return $list;
 }
 
