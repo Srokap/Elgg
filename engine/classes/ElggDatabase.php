@@ -2,9 +2,15 @@
 /**
  * Base class for database connections, as well as helper class with database API for elgg.
  */
-abstract class ElggDatabase implements 
+class ElggDatabase implements 
 	DatabaseAccess
 {
+	
+	private $connection;
+	
+	public function __construct(Zend_Db_Adapter_Abstract $conn) {
+		$this->connection = $conn;
+	}
 	
 	/**
 	 * Establish a connection to the database servser
@@ -42,8 +48,15 @@ abstract class ElggDatabase implements
 		$dbType = isset($CONFIG->dbtype) ? $CONFIG->dbtype : 'mysql';
 		$dbClassName = 'ElggDatabase'.elgg_strtoupper($dbType[0]).substr($dbType, 1);//make it camelcase
 		// Connect to database
-		$connection = new $dbClassName();
-		$connection->connect($dbhost, $dbuser, $dbpass, $dbname);
+// 		$connection = new $dbClassName();
+// 		$connection->connect($dbhost, $dbuser, $dbpass, $dbname);
+		$implementor = new Zend_Db_Adapter_Mysqli(array(
+			'dbname' => $dbname,
+			'username' => $dbuser,
+			'password' => $dbpass,
+			'host' => $dbhost,
+		));
+		$connection = new ElggDatabase($implementor);
 		// Set DB for UTF8
 		$connection->query("SET NAMES utf8");
 		$dblink[$dblinkname] = $connection;
@@ -262,7 +275,7 @@ abstract class ElggDatabase implements
 			// @todo check profiling to see if this needs to be broken out into
 			// explicit cases instead of checking in the interation.
 			$is_callable = is_callable($callback);
-			while ($row = $result->fetch_object()) {
+			while ($row = $result->fetchObject()) {
 				if ($is_callable) {
 					$row = $callback($row);
 				}
@@ -468,5 +481,84 @@ abstract class ElggDatabase implements
 			}
 		}
 		return (int) $int;
+	}
+	
+	/**
+	 * Returns error code of last operation or zero when no error occured.
+	 * @return int
+	 */
+	function getErrorCode() {
+		return (int)$this->lastSelect->errorCode();
+	}
+	
+	/**
+	 * Closes connection to database and cleans up.
+	 * @return bool if operation was successful
+	 */
+	function close() {
+		return $this->connection->closeConnection();
+	}
+	
+	/**
+	 * @var Zend_Db_Statement_Interface
+	 */
+	private $lastSelect;
+	
+	/**
+	 * Run query against database.
+	 * @param string $query query to run
+	 * @return mixed implementation-specific result object
+	 */
+	function query($query) {
+		return $this->lastSelect = $this->connection->query($query);
+	}
+	
+	/**
+	 * Returns version of server in two possible versions, depending on $humanreadable parameter value.
+	 * @param bool $humanreadable if set to false, function MUST return int or float value that increases with higher versions of DB engine.
+	 * @return int|string returns int value or string with human-redable DB version information
+	 */
+	function getVersion($humanreadable = false) {
+		return $this->connection->getServerVersion();
+	}
+	
+	/**
+	 * Returns string describing the error or empty string if no error occured.
+	 * @return string
+	 */
+	function getErrorMessage() {
+		return $this->lastSelect->errorInfo();
+	}
+	
+	function getInsertId() {
+		return $this->connection->lastInsertId();
+	}
+	
+	function getAffectedRowsCount() {
+		return null;
+	}
+	
+	function sanitiseString($string) {
+		return $string;
+	}
+	
+	function fetchObject() {
+		return $this->connection->fetchRow($this->lastSelect);
+	}
+	
+	function fetchAssoc() {
+		return $this->connection->fetchAssoc($this->lastSelect);
+	}
+	
+	function fetchArray($resulttype=null) {
+		return $this->connection->fetchAll($this->lastSelect);
+	}
+	
+	function getResultRowsCount() {
+		return $this->lastSelect->rowCount();
+	}
+	
+	function freeResult() {
+		return $this->lastSelect->closeCursor();
 	}
 }

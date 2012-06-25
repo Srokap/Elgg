@@ -166,9 +166,12 @@ class ElggCoreUserTest extends ElggCoreUnitTest {
 		$this->assertTrue($this->user->makeAdmin());
 
 		$q = "SELECT admin FROM {$CONFIG->dbprefix}users_entity WHERE guid = $guid";
-		$r = mysql_query($q);
+		$link = ElggDatabase::getConnection('read');
+		$r = $link->query($q);
+// 		$r = mysql_query($q);
 
-		$admin = mysql_fetch_assoc($r);
+// 		$admin = mysql_fetch_assoc($r);
+		$admin = $r->fetch_assoc();
 		$this->assertEqual($admin['admin'], 'yes');
 
 		$this->user->delete();
@@ -183,9 +186,12 @@ class ElggCoreUserTest extends ElggCoreUnitTest {
 		$this->assertTrue($this->user->removeAdmin());
 
 		$q = "SELECT admin FROM {$CONFIG->dbprefix}users_entity WHERE guid = $guid";
-		$r = mysql_query($q);
+		$link = ElggDatabase::getConnection('read');
+		$r = $link->query($q);
+// 		$r = mysql_query($q);
 
-		$admin = mysql_fetch_assoc($r);
+// 		$admin = mysql_fetch_assoc($r);
+		$admin = $r->fetch_assoc();
 		$this->assertEqual($admin['admin'], 'no');
 
 		$this->user->delete();

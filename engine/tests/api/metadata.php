@@ -129,8 +129,10 @@ class ElggCoreMetadataAPITest extends ElggCoreUnitTest {
 		global $CONFIG, $METASTRINGS_CACHE, $METASTRINGS_DEADNAME_CACHE;
 		$METASTRINGS_CACHE = $METASTRINGS_DEADNAME_CACHE = array();
 
-		mysql_query("INSERT INTO {$CONFIG->dbprefix}metastrings (string) VALUES ('$string')");
-		$this->metastrings[$string] = mysql_insert_id();
+// 		mysql_query("INSERT INTO {$CONFIG->dbprefix}metastrings (string) VALUES ('$string')");
+		$link = ElggDatabase::getConnection('write');
+		$this->metastrings[$string] = $link->insertData("INSERT INTO {$CONFIG->dbprefix}metastrings (string) VALUES ('$string')");	
+// 		$this->metastrings[$string] = mysql_insert_id();
 	}
 
 	protected function delete_metastrings() {
@@ -138,6 +140,8 @@ class ElggCoreMetadataAPITest extends ElggCoreUnitTest {
 		$METASTRINGS_CACHE = $METASTRINGS_DEADNAME_CACHE = array();
 
 		$strings = implode(', ', $this->metastrings);
-		mysql_query("DELETE FROM {$CONFIG->dbprefix}metastrings WHERE id IN ($strings)");
+// 		mysql_query("DELETE FROM {$CONFIG->dbprefix}metastrings WHERE id IN ($strings)");
+		$link = ElggDatabase::getConnection('write');
+		$this->metastrings[$string] = $link->insertData("DELETE FROM {$CONFIG->dbprefix}metastrings WHERE id IN ($strings)");
 	}
 }

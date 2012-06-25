@@ -488,6 +488,10 @@ function sanitize_int($int, $signed = true) {
 	return $dblink->sanitiseInt($int, $signed);
 }
 
+function db_delayedexecution_shutdown_hook() {
+	ElggDatabase::delayedExecutionShutdownHook();
+}
+
 /**
  * Registers shutdown functions for database profiling and delayed queries.
  *

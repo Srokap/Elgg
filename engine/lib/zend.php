@@ -9,4 +9,4 @@ function elgg_zend_register_classes() {
 // 	Zend_Loader::loadClass('Zend_Db_Adapter_Mysqli');
 }
 
-elgg_register_event_handler('boot', 'system', 'elgg_zend_register_classes');
+elgg_register_event_handler('boot', 'system', 'elgg_zend_register_classes', 0);//before engine boot

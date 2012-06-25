@@ -187,9 +187,11 @@ class ElggCoreRegressionBugsTest extends ElggCoreUnitTest {
 
 			db_delayedexecution_shutdown_hook();
 
-			$num_rows = mysql_num_rows($test_results);
+// 			$num_rows = mysql_num_rows($test_results);
+			$num_rows = $test_results->num_rows;
 			$this->assertEqual($num_rows, 1);
-			$row = mysql_fetch_assoc($test_results);
+// 			$row = mysql_fetch_assoc($test_results);
+			$row = $test_results->fetch_assoc();
 			$this->assertEqual($row['test'], 1);
 		}
 

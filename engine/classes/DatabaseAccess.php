@@ -5,16 +5,6 @@
 interface DatabaseAccess {
 	
 	/**
-	 * Setup new connection with database.
-	 * @param string $sqlserver host address
-	 * @param string $sqluser database user name
-	 * @param string $sqlpassword database password for user
-	 * @param string $database database name to be selected
-	 * @return mixed implementation-specific connection object
-	 */
-	function connect($sqlserver, $sqluser, $sqlpassword, $database);
-	
-	/**
 	 * Closes connection to database and cleans up.
 	 * @return bool if operation was successful
 	 */
