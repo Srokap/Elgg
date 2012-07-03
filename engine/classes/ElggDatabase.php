@@ -275,7 +275,10 @@ class ElggDatabase implements
 			// @todo check profiling to see if this needs to be broken out into
 			// explicit cases instead of checking in the interation.
 			$is_callable = is_callable($callback);
-			while ($row = $result->fetchObject()) {
+// 			while ($row = $result->fetch()) {
+			$rows = $result->fetchAll(PDO::FETCH_OBJ);
+			foreach ($rows as $row) {
+// 			while (($row = $result->fetch(PDO::FETCH_OBJ))!==false) {
 				if ($is_callable) {
 					$row = $callback($row);
 				}
@@ -287,7 +290,7 @@ class ElggDatabase implements
 					$return[] = $row;
 				}
 			}
-			$result->close();
+			$result->closeCursor();
 		}
 		if (empty($return)) {
 			elgg_log("DB query $query returned no results.", 'NOTICE');
@@ -417,7 +420,7 @@ class ElggDatabase implements
 	 * @param string $query  The query
 	 * @param ElggDatabase   $dblink The DB link
 	 *
-	 * @return The result of mysql_query()
+	 * @return The result of Zend_Db_Statement_Interface
 	 * @throws DatabaseException
 	 * @access private
 	 */
@@ -507,7 +510,7 @@ class ElggDatabase implements
 	/**
 	 * Run query against database.
 	 * @param string $query query to run
-	 * @return mixed implementation-specific result object
+	 * @return Zend_Db_Statement_Interface
 	 */
 	function query($query) {
 		return $this->lastSelect = $this->connection->query($query);
@@ -551,7 +554,8 @@ class ElggDatabase implements
 	}
 	
 	function fetchArray($resulttype=null) {
-		return $this->connection->fetchAll($this->lastSelect);
+		return $this->connection->fetchAssoc($this->lastSelect);
+// 		return $this->connection->fetchAll($this->lastSelect);
 	}
 	
 	function getResultRowsCount() {
