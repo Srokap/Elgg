@@ -9,7 +9,10 @@
 
 // prep core classes to be autoloadable
 spl_autoload_register('_elgg_autoload');
-elgg_register_classes(dirname(dirname(__FILE__)) . '/classes');
+// $mt = microtime(true);
+// elgg_register_classes(dirname(dirname(__FILE__)) . '/classes');
+// var_dump(microtime(true)-$mt);
+var_dump('autoloader');
 
 /**
  * Autoload classes
@@ -24,7 +27,30 @@ function _elgg_autoload($class) {
 	global $CONFIG;
 
 	if (!isset($CONFIG->classes[$class]) || !include($CONFIG->classes[$class])) {
-		return false;
+		var_dump($class, $CONFIG->system_cache_loaded);
+		if ($CONFIG->system_cache_loaded===true) {
+			static $cacheReloaded;
+			//try reloading cache once and try again
+			if ($cacheReloaded!==true) {
+				//TODO force reload classes cache
+				$cacheReloaded = true;
+				return _elgg_autoload();
+			} else {
+				return false;//we tried reloading cache already, nothing more to do
+			}
+		} else {
+			var_dump($class);
+			//try fallback for core classes not initialized yet
+			$classPath = dirname(dirname(__FILE__)) . '/classes/';
+			$mt = microtime(true);
+			if (file_exists($classPath.$class.'.php')) {
+				if(!include($classPath.$class.'.php')) {
+					return false;
+				}
+			} else {
+				return false;//no cache in place or caching is off
+			}
+		}
 	}
 }
 

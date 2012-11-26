@@ -309,6 +309,7 @@ function elgg_load_plugins() {
 
 	if (elgg_get_config('system_cache_loaded')) {
 		$start_flags = $start_flags & ~ELGG_PLUGIN_REGISTER_VIEWS;
+		$start_flags = $start_flags & ~ELGG_PLUGIN_REGISTER_CLASSES;
 	}
 
 	if (elgg_get_config('i18n_loaded_from_cache')) {

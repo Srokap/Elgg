@@ -388,7 +388,7 @@ function elgg_invalidate_simplecache() {
 
 	return $return;
 }
-
+var_dump('cache');
 /**
  * @see elgg_reset_system_cache()
  * @access private
@@ -410,7 +410,14 @@ function _elgg_load_cache() {
 		return;
 	}
 	$CONFIG->view_types = unserialize($data);
-
+	
+	$data = elgg_load_system_cache('class_paths');
+	if (!is_string($data)) {
+		return;
+	}
+	var_dump($CONFIG->classes);
+	$CONFIG->classes = unserialize($data);
+	
 	$CONFIG->system_cache_loaded = true;
 }
 
@@ -439,6 +446,13 @@ function _elgg_cache_init() {
 	if ($CONFIG->system_cache_enabled && !$CONFIG->system_cache_loaded) {
 		elgg_save_system_cache('view_locations', serialize($CONFIG->views->locations));
 		elgg_save_system_cache('view_types', serialize($CONFIG->view_types));
+		
+		//prepare full classes array to be put in cache
+		$data = $CONFIG->classes;
+		$CONFIG->classes = array();
+		elgg_register_classes(dirname(dirname(__FILE__)) . '/classes');
+		$CONFIG->classes = array_merge((array)$CONFIG->classes, (array)$data);
+		elgg_save_system_cache('class_paths', serialize($CONFIG->classes));
 	}
 
 	if ($CONFIG->system_cache_enabled && !$CONFIG->i18n_loaded_from_cache) {
