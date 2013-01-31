@@ -40,6 +40,12 @@ if ($url !== $new_url) {
 
 require_once(dirname(dirname(__FILE__)) . "/start.php");
 
+if (!elgg_is_logged_in()) {
+	header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', strtotime("+60 seconds")), true);
+	header("Pragma: public", true);
+	header("Cache-Control: public", true);
+}
+
 $handler = get_input('handler');
 $page = get_input('page');
 
