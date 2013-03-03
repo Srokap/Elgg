@@ -32,6 +32,7 @@ class Elgg_CacheHandler {
 		// this may/may not have to connect to the DB
 		$this->setupSimplecache();
 
+		//cache disabled - do the shortcut
 		if (!$this->config->simplecache_enabled) {
 			$this->loadEngine();
 			if (!_elgg_is_view_cacheable($view)) {
@@ -43,46 +44,76 @@ class Elgg_CacheHandler {
 		}
 
 		$etag = "\"$ts\"";
-                // If is the same ETag, content didn't change.
-                if (isset($server_vars['HTTP_IF_NONE_MATCH']) && trim($server_vars['HTTP_IF_NONE_MATCH']) === $etag) {
-                        header("HTTP/1.1 304 Not Modified");
-                        exit;
-                }
+		// If is the same ETag, content didn't change.
+		if (isset($server_vars['HTTP_IF_NONE_MATCH']) && trim($server_vars['HTTP_IF_NONE_MATCH']) === $etag) {
+			header("HTTP/1.1 304 Not Modified");
+			exit;
+		}
 
 		$filename = $this->config->dataroot . 'views_simplecache/' . md5("$viewtype|$view");
+
+		// Try fetching from simplecache
 		if (file_exists($filename)) {
 			$this->sendCacheHeaders($etag);
 			readfile($filename);
 			exit;
+		} else { // no file in simplecache - load core and regenerate file 
+
+			$this->loadEngine();
+			
+			elgg_set_viewtype($viewtype);
+			if (!_elgg_is_view_cacheable($view)) {
+				$this->send403();
+			}
+	
+			$cache_timestamp = (int)elgg_get_config('lastcache');
+	
+			if ($cache_timestamp == $ts) {
+				$this->sendCacheHeaders($etag);
+	
+				$content = $this->getProcessedView($view, $viewtype);
+	
+				$dir_name = $this->config->dataroot . 'views_simplecache/';
+				if (!is_dir($dir_name)) {
+					mkdir($dir_name, 0700);
+				}
+				
+				file_put_contents($filename, $content);
+				
+				$this->addToPublicCache($ts, $view, $viewtype, $content);
+			} else {
+				// if wrong timestamp, don't send HTTP cache
+				$content = $this->renderView($ts, $view, $viewtype);
+			}
+	
+			echo $content;
+			exit;
 		}
-
-		$this->loadEngine();
-		
-		elgg_set_viewtype($viewtype);
-		if (!_elgg_is_view_cacheable($view)) {
-			$this->send403();
+	}
+	
+	/**
+	 * Try putting file in public folder /cache/. Assumes core loaded
+	 */
+	protected function addToPublicCache($ts, $view, $viewtype, $content) {
+		if (empty($this->config->path) || !is_writable($this->config->path)) {
+			return;
 		}
-
-		$cache_timestamp = (int)elgg_get_config('lastcache');
-
-		if ($cache_timestamp == $ts) {
-			$this->sendCacheHeaders($etag);
-
-			$content = $this->getProcessedView($view, $viewtype);
-
-			$dir_name = $this->config->dataroot . 'views_simplecache/';
-			if (!is_dir($dir_name)) {
-				mkdir($dir_name, 0700);
+		//filter extensions
+		$allowedExtensions = array('js', 'css', 'jpg', 'jpeg', 'png', 'gif');
+		$ext = pathinfo($view, PATHINFO_EXTENSION); 
+		if (in_array(strtolower($ext), $allowedExtensions)) {
+			//initialize cache
+			$filePath = $this->config->path . "cache/$ts/$viewtype/$view";
+			$dirPath = dirname($filePath);
+			
+			//create path
+			if (!is_dir($dirPath)) {
+				mkdir($dirPath, 0700, true);
 			}
 			
-			file_put_contents($filename, $content);
-		} else {
-			// if wrong timestamp, don't send HTTP cache
-			$content = $this->renderView($view, $viewtype);
+			//put content
+			file_put_contents($filePath, $content);
 		}
-
-		echo $content;
-		exit;
 	}
 
 	/**
