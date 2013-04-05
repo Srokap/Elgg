@@ -140,6 +140,32 @@ $form_body .= '</div>';
 $form_body .= "</fieldset>";
 
 
+// control comments
+$options = array(
+	'options' => array(elgg_echo('installation:comments:label') => elgg_echo('installation:comments:label')),
+	'name' => 'comments_enabled',
+	'value' => elgg_get_config('comments_enabled') ? elgg_echo('installation:comments:label') : '',
+);
+$form_body .= '<div>' . elgg_echo('installation:comments:description');
+$form_body .= '<br />' .elgg_view('input/checkboxes', $options) . '</div>';
+
+// control walled garden
+$walled_garden = elgg_get_config(walled_garden);
+$options = array(
+	'options' => array(elgg_echo('installation:walled_garden:label') => 1),
+	'name' => 'walled_garden',
+	'value' => $walled_garden ? 1 : 0,
+);
+$form_body .= '<div>' . elgg_echo('installation:walled_garden:description');
+$form_body .= '<br />' . elgg_view('input/checkboxes', $options) . '</div>';
+
+$form_body .= "<div>" . elgg_echo('installation:httpslogin') . "<br />";
+$form_body .= elgg_view("input/checkboxes", array(
+	'options' => array(elgg_echo('installation:httpslogin:label') => 1),
+	'name' => 'https_login',
+	'value' => (elgg_get_config('https_login') ? 1 : 0)
+)) . "</div>";
+
 $form_body .= elgg_view('input/hidden', array('name' => 'settings', 'value' => 'go'));
 
 $form_body .= '<div class="elgg-foot">';
