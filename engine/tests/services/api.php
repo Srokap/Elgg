@@ -300,7 +300,7 @@ class ElggCoreServicesApiTest extends ElggCoreUnitTest {
 	public function testApiAuthKeyBadKey() {
 		global $CONFIG;
 		
-		$CONFIG->input['api_key'] = 'BAD';
+		set_input('api_key', 'BAD');
 		try {
 			api_auth_key();
 			$this->assertTrue(FALSE);
