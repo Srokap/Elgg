@@ -12,7 +12,7 @@ class ElggCoreServicesApiTest extends ElggCoreUnitTest {
 	 */
 	public function tearDown() {
 		global $API_METHODS;
-		$this->swallowErrors();
+		// $this->swallowErrors();
 		$API_METHODS = array();
 	}
 	
