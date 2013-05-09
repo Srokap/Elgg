@@ -218,6 +218,9 @@ class ElggAttributeLoader {
 
 		// guid needs to be an int  https://github.com/elgg/elgg/issues/4111
 		$row['guid'] = (int) $row['guid'];
+		$row['access_id'] = (int) $row['access_id'];
+		$row['owner_guid'] = (int) $row['owner_guid'];
+		$row['container_guid'] = (int) $row['container_guid'];
 
 		return $row;
 	}
