@@ -40,9 +40,6 @@ class ElggUser extends ElggEntity
 		$this->attributes['code'] = NULL;
 		$this->attributes['banned'] = "no";
 		$this->attributes['admin'] = 'no';
-		$this->attributes['prev_last_action'] = NULL;
-		$this->attributes['last_login'] = NULL;
-		$this->attributes['prev_last_login'] = NULL;
 		$this->attributes['tables_split'] = 2;
 	}
 
@@ -65,7 +62,7 @@ class ElggUser extends ElggEntity
 			if ($guid instanceof stdClass) {
 				// Load the rest
 				if (!$this->load($guid)) {
-					$msg = elgg_echo('IOException:FailedToLoadGUID', array(get_class(), $guid->guid));
+					$msg = "Failed to load new " . get_class() . " from GUID:" . $guid->guid;
 					throw new IOException($msg);
 				}
 			} else if (is_string($guid)) {
@@ -85,14 +82,14 @@ class ElggUser extends ElggEntity
 				}
 			} else if ($guid instanceof ElggEntity) {
 				// @todo why have a special case here
-				throw new InvalidParameterException(elgg_echo('InvalidParameterException:NonElggUser'));
+				throw new InvalidParameterException("Passing a non-ElggUser to an ElggUser constructor!");
 			} else if (is_numeric($guid)) {
 				// $guid is a GUID so load entity
 				if (!$this->load($guid)) {
-					throw new IOException(elgg_echo('IOException:FailedToLoadGUID', array(get_class(), $guid)));
+					throw new IOException("Failed to load new " . get_class() . " from GUID:" . $guid);
 				}
 			} else {
-				throw new InvalidParameterException(elgg_echo('InvalidParameterException:UnrecognisedValue'));
+				throw new InvalidParameterException("Unrecognized value passed to constuctor.");
 			}
 		}
 	}
@@ -105,7 +102,7 @@ class ElggUser extends ElggEntity
 	 * @return bool
 	 */
 	protected function load($guid) {
-		$attr_loader = new ElggAttributeLoader(get_class(), 'user', $this->attributes);
+		$attr_loader = new Elgg_AttributeLoader(get_class(), 'user', $this->attributes);
 		$attr_loader->secondary_loader = 'get_user_entity_as_row';
 
 		$attrs = $attr_loader->getRequiredAttributes($guid);
@@ -120,25 +117,60 @@ class ElggUser extends ElggEntity
 		return true;
 	}
 
+
 	/**
-	 * Saves this user to the database.
-	 *
-	 * @return bool
+	 * {@inheritdoc}
 	 */
-	public function save() {
-		// Save generic stuff
-		if (!parent::save()) {
+	protected function create() {
+		global $CONFIG;
+	
+		$guid = parent::create();
+		$name = sanitize_string($this->name);
+		$username = sanitize_string($this->username);
+		$password = sanitize_string($this->password);
+		$salt = sanitize_string($this->salt);
+		$email = sanitize_string($this->email);
+		$language = sanitize_string($this->language);
+		$code = sanitize_string($this->code);
+
+		$query = "INSERT into {$CONFIG->dbprefix}users_entity
+			(guid, name, username, password, salt, email, language, code)
+			values ($guid, '$name', '$username', '$password', '$salt', '$email', '$language', '$code')";
+
+		$result = $this->getDatabase()->insertData($query);
+		if ($result === false) {
+			// TODO(evan): Throw an exception here?
 			return false;
 		}
+		
+		return $guid;
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	protected function update() {
+		global $CONFIG;
+		
+		if (!parent::update()) {
+			return false;
+		}
+		
+		$guid = (int)$this->guid;
+		$name = sanitize_string($this->name);
+		$username = sanitize_string($this->username);
+		$password = sanitize_string($this->password);
+		$salt = sanitize_string($this->salt);
+		$email = sanitize_string($this->email);
+		$language = sanitize_string($this->language);
+		$code = sanitize_string($this->code);
 
-		// Now save specific stuff
-		_elgg_disable_caching_for_entity($this->guid);
-		$ret = create_user_entity($this->get('guid'), $this->get('name'), $this->get('username'),
-			$this->get('password'), $this->get('salt'), $this->get('email'), $this->get('language'),
-			$this->get('code'));
-		_elgg_enable_caching_for_entity($this->guid);
+		$query = "UPDATE {$CONFIG->dbprefix}users_entity
+			SET name='$name', username='$username', password='$password', salt='$salt',
+			email='$email', language='$language', code='$code'
+			WHERE guid = $guid";
 
-		return $ret;
+		return $this->getDatabase()->updateData($query) !== false;
 	}
 
 	/**
@@ -161,6 +193,46 @@ class ElggUser extends ElggEntity
 
 		// Delete entity
 		return parent::delete();
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getDisplayName() {
+		return $this->name;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function setDisplayName($displayName) {
+		$this->name = $displayName;
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function set($name, $value) {
+		if (array_key_exists($name, $this->attributes)) {
+			switch ($name) {
+				case 'prev_last_action':
+				case 'last_login':
+				case 'prev_last_login':
+					if ($value !== null) {
+						$this->attributes[$name] = (int)$value;
+					} else {
+						$this->attributes[$name] = null;
+					}
+					break;
+				default:
+					return parent::set($name, $value);
+					break;
+			}
+		} else {
+			return parent::set($name, $value);
+		}
+	
+		return TRUE;
 	}
 
 	/**
@@ -250,7 +322,7 @@ class ElggUser extends ElggEntity
 	 * @return array
 	 */
 	function getSites($subtype = "", $limit = 10, $offset = 0) {
-		return get_user_sites($this->getGUID(), $subtype, $limit, $offset);
+		return get_user_sites($this->getGUID(), $limit, $offset);
 	}
 
 	/**
@@ -463,7 +535,15 @@ class ElggUser extends ElggEntity
 	 * @return array|false
 	 */
 	public function getFriendsObjects($subtype = "", $limit = 10, $offset = 0) {
-		return get_user_friends_objects($this->getGUID(), $subtype, $limit, $offset);
+		return elgg_get_entities_from_relationship(array(
+			'type' => 'object',
+			'subtype' => $subtype,
+			'limit' => $limit,
+			'offset' => $offset,
+			'relationship' => 'friend',
+			'relationship_guid' => $this->getGUID(),
+			'relationship_join_on' => 'container_guid',
+		));
 	}
 
 	/**
@@ -517,12 +597,25 @@ class ElggUser extends ElggEntity
 		$this->getOwnerGUID();
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
+	protected function prepareObject($object) {
+		$object = parent::prepareObject($object);
+		$object->name = $this->getDisplayName();
+		$object->username = $this->username;
+		$object->language = $this->language;
+		unset($object->read_access);
+		return $object;
+	}
+
 	// EXPORTABLE INTERFACE ////////////////////////////////////////////////////////////
 
 	/**
 	 * Return an array of fields which can be exported.
 	 *
 	 * @return array
+	 * @deprecated 1.9 Use toObject()
 	 */
 	public function getExportableValues() {
 		return array_merge(parent::getExportableValues(), array(
