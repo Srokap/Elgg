@@ -8,6 +8,13 @@ elgg.upgrades.init = function () {
 	$('#comment-upgrade-run').click(elgg.upgrades.upgradeComments);
 };
 
+elgg.upgrades.config = {
+	minLimit: 10, //minimum limit value for single chunk of data being processed
+	maxLimit: 300, //maximum limit value for single chunk of data being processed
+	timeThreshold: 15000, //target conversion time in microseconds used for limit regulation
+	changeFactor: 1.5 //multiplier or divider used for limit regulation
+};
+
 /**
  * Initializes the comment upgrade feature
  *
@@ -29,8 +36,8 @@ elgg.upgrades.upgradeComments = function(e) {
 	$('#comment-upgrade-run').addClass('hidden');
 	$('#comment-upgrade-spinner').removeClass('hidden');
 
-	// Start comment upgrade from offset 0
-	elgg.upgrades.upgradeCommentBatch(0);
+	// Start comment upgrade from offset 0 and limit 10
+	elgg.upgrades.upgradeCommentBatch(0, 10);
 };
 
 /**
@@ -38,16 +45,20 @@ elgg.upgrades.upgradeComments = function(e) {
  *
  * @param {Number} offset  The next upgrade offset
  */
-elgg.upgrades.upgradeCommentBatch = function(offset) {
+elgg.upgrades.upgradeCommentBatch = function(offset, limit) {
 	var options = {
 			data: {
-				offset: offset
+				offset: offset,
+				limit: limit
 			},
 			dataType: 'json'
 		},
 		$upgradeCount = $('#comment-upgrade-count');
 
 	options.data = elgg.security.addToken(options.data);
+
+	var startTime = new Date.getTime();
+	var self = this;
 
 	options.success = function(json) {
 		// Append possible errors after the progressbar
@@ -78,11 +89,25 @@ elgg.upgrades.upgradeCommentBatch = function(offset) {
 		$('.elgg-progressbar').progressbar({ value: numProcessed });
 
 		if (numProcessed < total) {
+			//adjust limit based on last run time
+			var rTime = new Date().getTime() - startTime;
+			if (rTime > self.config.timeThreshold) {
+				limit *= self.config.changeFactor;
+			} else {
+				limit /= self.config.changeFactor;
+			}
+			limit = Math.round(limit);
+			//clip to acceptable bounds
+			if (limit < self.config.minLimit) {
+				limit = self.config.minLimit;
+			} else if (limit > self.config.maxLimit) {
+				limit = self.config.maxLimit;
+			}
 			/**
 			 * Start next upgrade call. Offset is the total amount of erros so far.
 			 * This prevents faulty comments from causing the same error again.
 			 */
-			elgg.upgrades.upgradeCommentBatch(newOffset);
+			elgg.upgrades.upgradeCommentBatch(newOffset, limit);
 		} else {
 			// Upgrade is finished
 			elgg.system_message(elgg.echo('upgrade:comments:finished'));
