@@ -91,6 +91,7 @@ elgg.upgrades.upgradeCommentBatch = function(offset, limit) {
 		if (numProcessed < total) {
 			//adjust limit based on last run time
 			var rTime = new Date().getTime() - startTime;
+			$('#comment-upgrade-speed').text(elgg.echo('upgrade:comments:speed', [limit / rTime / 1000]));
 			if (rTime > self.config.timeThreshold) {
 				limit *= self.config.changeFactor;
 			} else {

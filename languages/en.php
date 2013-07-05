@@ -684,7 +684,7 @@ These changes will only affect new users on the site.',
 /**
  * User settings
  */
-		
+
 	'usersettings:description' => "The user settings panel allows you to control all your personal settings, from user management to how plugins behave. Choose an option below to get started.",
 
 	'usersettings:statistics' => "Your statistics",
@@ -711,7 +711,7 @@ These changes will only affect new users on the site.',
 /**
  * Activity river
  */
-		
+
 	'river:all' => 'All Site Activity',
 	'river:mine' => 'My Activity',
 	'river:owner' => 'Activity of %s',
@@ -737,7 +737,7 @@ These changes will only affect new users on the site.',
 	'icon:size:medium' => "Medium",
 	'icon:size:large' => "Large",
 	'icon:size:master' => "Extra Large",
-		
+
 /**
  * Generic action words
  */
@@ -820,11 +820,11 @@ These changes will only affect new users on the site.',
 
 	'active' => 'Active',
 	'total' => 'Total',
-	
+
 	'ok' => 'OK',
 	'any' => 'Any',
 	'error' => 'Error',
-	
+
 	'other' => 'Other',
 	'options' => 'Options',
 	'advanced' => 'Advanced',
@@ -837,7 +837,7 @@ These changes will only affect new users on the site.',
 	'content:latest:blurb' => 'Alternatively, click here to view the latest content from across the site.',
 
 	'link:text' => 'view link',
-	
+
 /**
  * Generic questions
  */
@@ -865,7 +865,7 @@ These changes will only affect new users on the site.',
 	'sort:popular' => 'Popular',
 	'sort:alpha' => 'Alphabetical',
 	'sort:priority' => 'Priority',
-		
+
 /**
  * Generic data words
  */
@@ -892,7 +892,7 @@ These changes will only affect new users on the site.',
 /**
  * Entity actions
  */
-		
+
 	'edit:this' => 'Edit this',
 	'delete:this' => 'Delete this',
 	'comment:this' => 'Comment on this',
@@ -935,7 +935,7 @@ Once you have logged in, we highly recommend that you change your password.
 /**
  * Import / export
  */
-		
+
 	'importsuccess' => "Import of data was successful",
 	'importfail' => "OpenDD import of data failed.",
 
@@ -951,7 +951,7 @@ Once you have logged in, we highly recommend that you change your password.
 	'friendlytime:days' => "%s days ago",
 	'friendlytime:days:singular' => "yesterday",
 	'friendlytime:date_format' => 'j F Y @ g:ia',
-	
+
 	'friendlytime:future:minutes' => "in %s minutes",
 	'friendlytime:future:minutes:singular' => "in a minute",
 	'friendlytime:future:hours' => "in %s hours",
@@ -979,7 +979,7 @@ Once you have logged in, we highly recommend that you change your password.
 	'date:weekday:4' => 'Thursday',
 	'date:weekday:5' => 'Friday',
 	'date:weekday:6' => 'Saturday',
-	
+
 	'interval:minute' => 'Every minute',
 	'interval:fiveminute' => 'Every five minutes',
 	'interval:fifteenmin' => 'Every fifteen minutes',
@@ -1070,10 +1070,12 @@ Once you have logged in, we highly recommend that you change your password.
 	'upgrade:comments:warning' => '<b>Warning:</b> on a large site this upgrade may take a significantly long time!',
 	'upgrade:comments:success_count' => 'Comments upgraded:',
 	'upgrade:comments:error_count' => 'Errors:',
+	'upgrade:comments:upgrade_speed' => 'Speed:',
 	'admin:comment_upgrade' => 'Comment upgrade',
 	'upgrade:comments:river_update_failed' => 'Failed to update the river entry for comment id %s',
 	'upgrade:comments:create_failed' => 'Failed to convert comment id %s to an entity.',
 	'upgrade:comments:finished' => 'Upgrade finished',
+	'upgrade:comments:speed' => '%.1f comments/s',
 
 /**
  * Welcome
@@ -1085,12 +1087,12 @@ Once you have logged in, we highly recommend that you change your password.
 /**
  * Emails
  */
-		
+
 	'email:from' => 'From',
 	'email:to' => 'To',
 	'email:subject' => 'Subject',
 	'email:body' => 'Body',
-	
+
 	'email:settings' => "Email settings",
 	'email:address:label' => "Email address",
 
@@ -1174,7 +1176,7 @@ Please do not reply to this email.",
 /**
  * Entities
  */
-	
+
 	'byline' => 'By %s',
 	'entity:default:strapline' => 'Created %s by %s',
 	'entity:default:missingsupport:popup' => 'This entity cannot be displayed correctly. This may be because it requires support provided by a plugin that is no longer installed.',
@@ -1191,7 +1193,7 @@ Please do not reply to this email.",
 	'actiongatekeeper:timeerror' => 'The page you were using has expired. Please refresh and try again.',
 	'actiongatekeeper:pluginprevents' => 'A extension has prevented this form from being submitted.',
 	'actiongatekeeper:uploadexceeded' => 'The size of file(s) uploaded exceeded the limit set by your site administrator',
-	'actiongatekeeper:crosssitelogin' => "Sorry, logging in from a different domain is not permitted. Please try again.", 
+	'actiongatekeeper:crosssitelogin' => "Sorry, logging in from a different domain is not permitted. Please try again.",
 
 /**
  * Word blacklists
