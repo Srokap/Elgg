@@ -38,7 +38,7 @@ if ($count) {
 		<ul class="mvl">
 			<li>$success_count_string <span id="comment-upgrade-success-count">0</span></li>
 			<li>$error_count_string <span id="comment-upgrade-error-count">0</span></li>
-			<li>$speed_description_string <span id="comment-upgrade-error-speed"></span></li>
+			<li>$speed_description_string <span id="comment-upgrade-speed"></span></li>
 		</ul>
 		<ul class="mvl" id="comment-upgrade-messages"></ul>
 HTML;

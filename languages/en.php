@@ -1075,7 +1075,7 @@ Once you have logged in, we highly recommend that you change your password.
 	'upgrade:comments:river_update_failed' => 'Failed to update the river entry for comment id %s',
 	'upgrade:comments:create_failed' => 'Failed to convert comment id %s to an entity.',
 	'upgrade:comments:finished' => 'Upgrade finished',
-	'upgrade:comments:speed' => '%.1f comments/s',
+	'upgrade:comments:speed' => '%s comments/s',
 
 /**
  * Welcome

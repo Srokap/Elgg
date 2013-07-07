@@ -11,7 +11,7 @@ elgg.upgrades.init = function () {
 elgg.upgrades.config = {
 	minLimit: 10, //minimum limit value for single chunk of data being processed
 	maxLimit: 300, //maximum limit value for single chunk of data being processed
-	timeThreshold: 15000, //target conversion time in microseconds used for limit regulation
+	timeThreshold: 20000, //target conversion time in microseconds used for limit regulation
 	changeFactor: 1.5 //multiplier or divider used for limit regulation
 };
 
@@ -57,7 +57,7 @@ elgg.upgrades.upgradeCommentBatch = function(offset, limit) {
 
 	options.data = elgg.security.addToken(options.data);
 
-	var startTime = new Date.getTime();
+	var startTime = new Date().getTime();
 	var self = this;
 
 	options.success = function(json) {
@@ -91,8 +91,8 @@ elgg.upgrades.upgradeCommentBatch = function(offset, limit) {
 		if (numProcessed < total) {
 			//adjust limit based on last run time
 			var rTime = new Date().getTime() - startTime;
-			$('#comment-upgrade-speed').text(elgg.echo('upgrade:comments:speed', [limit / rTime / 1000]));
-			if (rTime > self.config.timeThreshold) {
+			$('#comment-upgrade-speed').text(elgg.echo('upgrade:comments:speed', [(limit / rTime * 1000).toFixed(1)]));
+			if (rTime < self.config.timeThreshold) {
 				limit *= self.config.changeFactor;
 			} else {
 				limit /= self.config.changeFactor;
