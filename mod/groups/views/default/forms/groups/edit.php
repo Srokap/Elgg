@@ -5,18 +5,19 @@
  * @package ElggGroups
  */
 
-// only extract these elements.
-$name = $membership = $vis = $entity = null;
-extract($vars, EXTR_IF_EXISTS);
+$name = elgg_extract('name', $vars);
+$membership = elgg_extract('membership', $vars);
+$vis = elgg_extract('vis', $vars);
 
 /* @var ElggGroup $entity */
 
 if (isset($vars['entity'])) {
 	$entity = $vars['entity'];
-	$owner_guid = $vars['entity']->owner_guid;
+	$owner_guid = $entity->owner_guid;
 	$content_access_mode = $entity->getContentAccessMode();
 } else {
 	$entity = false;
+	$owner_guid = null;
 	$content_access_mode = ElggGroup::CONTENT_ACCESS_MODE_UNRESTRICTED;
 }
 
@@ -119,7 +120,7 @@ if ($entity && ($owner_guid == elgg_get_logged_in_user_guid() || elgg_is_admin_l
 
 	$options = array(
 		'relationship' => 'member',
-		'relationship_guid' => $vars['entity']->getGUID(),
+		'relationship_guid' => $entity->getGUID(),
 		'inverse_relationship' => true,
 		'type' => 'user',
 		'limit' => 0,
