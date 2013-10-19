@@ -5,18 +5,17 @@
  * @package ElggGroups
  */
 
+$entity = elgg_extract('entity', $vars);
 $name = elgg_extract('name', $vars);
 $membership = elgg_extract('membership', $vars);
 $vis = elgg_extract('vis', $vars);
 
 /* @var ElggGroup $entity */
 
-if (isset($vars['entity'])) {
-	$entity = $vars['entity'];
+if ($entity) {
 	$owner_guid = $entity->owner_guid;
 	$content_access_mode = $entity->getContentAccessMode();
 } else {
-	$entity = false;
 	$owner_guid = null;
 	$content_access_mode = ElggGroup::CONTENT_ACCESS_MODE_UNRESTRICTED;
 }
