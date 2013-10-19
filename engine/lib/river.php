@@ -106,8 +106,8 @@ function elgg_create_river_item(array $options = array()) {
 	$subject_guid = sanitise_int($values['subject_guid']);
 	$object_guid = sanitise_int($values['object_guid']);
 	$target_guid = sanitise_int($values['target_guid']);
-	$posted = sanitise_int($values['annotation_id']);
-	$annotation_id = sanitise_int($values['posted']);
+	$annotation_id = sanitise_int($values['annotation_id']);
+	$posted = sanitise_int($values['posted']);
 
 	$id = insert_data("INSERT INTO {$dbprefix}river " .
 		" SET type = '$type', " .
