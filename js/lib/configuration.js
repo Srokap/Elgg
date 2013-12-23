@@ -1,3 +1,4 @@
+/*globals elgg*/
 elgg.provide('elgg.config');
 
 /**
@@ -23,9 +24,9 @@ elgg.get_simplecache_url = function(type, view) {
 	} else {
 		lastcache = 0;
 	}
-	if ((type === 'js' || type === 'css') && 0 == view.indexOf(type + '/')) {
+	if ((type === 'js' || type === 'css') && 0 === view.indexOf(type + '/')) {
 		view = view.substr(type.length + 1);
 	}
 	var path = '/cache/' + lastcache + '/' + elgg.config.viewtype + '/' + type + '/' + view;
 	return elgg.normalize_url(path);
-}
+};

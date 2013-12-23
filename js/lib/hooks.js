@@ -1,3 +1,4 @@
+/*globals elgg*/
 /*
  * Javascript hook interface
  */
@@ -94,19 +95,19 @@ elgg.trigger_hook = function(name, type, params, value) {
 
 	var hooksList = [];
 	
-	if (name != 'all' && type != 'all') {
+	if (name !== 'all' && type !== 'all') {
 		hooksList.push(hooks[name][type]);
 	}
 
-	if (type != 'all') {
-		hooksList.push(hooks['all'][type]);
+	if (type !== 'all') {
+		hooksList.push(hooks.all[type]);
 	}
 
-	if (name != 'all') {
-		hooksList.push(hooks[name]['all']);
+	if (name !== 'all') {
+		hooksList.push(hooks[name].all);
 	}
 
-	hooksList.push(hooks['all']['all']);
+	hooksList.push(hooks.all.all);
 
 	hooksList.every(function(handlers) {
 		if (handlers instanceof elgg.ElggPriorityList) {
@@ -115,7 +116,7 @@ elgg.trigger_hook = function(name, type, params, value) {
 		return true;
 	});
 
-	return (tempReturnValue != null) ? tempReturnValue : returnValue;
+	return (tempReturnValue !== null) ? tempReturnValue : returnValue;
 };
 
 /**

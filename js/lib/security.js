@@ -1,3 +1,4 @@
+/*globals elgg, $*/
 /**
  * Hold security-related data here
  */
@@ -13,7 +14,7 @@ elgg.security.tokenRefreshTimer = null;
  * @param {Object} json The json representation of a token containing __elgg_ts and __elgg_token
  * @return {Void}
  */
-elgg.security.setToken = function(json) {	
+elgg.security.setToken = function(json) {
 	//update the convenience object
 	elgg.security.token = json;
 
@@ -38,7 +39,7 @@ elgg.security.refreshToken = function() {
 	elgg.getJSON('refresh_token', function(data) {
 		if (data && data.__elgg_ts && data.__elgg_token) {
 			elgg.security.setToken(data);
-			if (elgg.is_logged_in() && data.logged_in == false) {
+			if (elgg.is_logged_in() && data.logged_in === false) {
 				elgg.session.user = null;
 				elgg.register_error(elgg.echo('session_expired'));
 			}
@@ -63,24 +64,24 @@ elgg.security.addToken = function(data) {
 			args = {},
 			base = '';
 		
-		if (parts['host'] == undefined) {
+		if (parts.host === undefined) {
 			if (data.indexOf('?') === 0) {
 				// query string
 				base = '?';
-				args = elgg.parse_str(parts['query']);
+				args = elgg.parse_str(parts.query);
 			}
 		} else {
 			// full or relative URL
 
-			if (parts['query'] != undefined) {
+			if (parts.query !== undefined) {
 				// with query string
-				args = elgg.parse_str(parts['query']);
+				args = elgg.parse_str(parts.query);
 			}
 			var split = data.split('?');
 			base = split[0] + '?';
 		}
-		args["__elgg_ts"] = elgg.security.token.__elgg_ts;
-		args["__elgg_token"] = elgg.security.token.__elgg_token;
+		args.__elgg_ts = elgg.security.token.__elgg_ts;
+		args.__elgg_token = elgg.security.token.__elgg_token;
 
 		return base + jQuery.param(args);
 	}

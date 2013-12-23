@@ -252,27 +252,27 @@ elgg.normalize_url = function(url) {
 
 	var validated = (function(url) {
 		url = elgg.parse_url(url);
-		if (url.scheme){
+		if (url.scheme) {
 			url.scheme = url.scheme.toLowerCase();
 		}
-		if (url.scheme == 'http' || url.scheme == 'https') {
+		if (url.scheme === 'http' || url.scheme === 'https') {
 			if (!url.host) {
 				return false;
 			}
 			/* hostname labels may contain only alphanumeric characters, dots and hypens. */
-			if (!(new RegExp("^([a-zA-Z0-9][a-zA-Z0-9\\-\\.]*)$", "i")).test(url.host) || url.host.charAt(-1) == '.') {
+			if (!(new RegExp("^([a-zA-Z0-9][a-zA-Z0-9\\-\\.]*)$", "i")).test(url.host) || url.host.charAt(-1) === '.') {
 				return false;
 			}
 		}
 		/* some schemas allow the host to be empty */
-		if (!url.scheme || !url.host && url.scheme != 'mailto' && url.scheme != 'news' && url.scheme != 'file') {
+		if (!url.scheme || !url.host && url.scheme !== 'mailto' && url.scheme !== 'news' && url.scheme !== 'file') {
 			return false;
 		}
 		return true;
 	})(url);
 
 	// all normal URLs including mailto:
-	if (validated) {		
+	if (validated) {
 		return url;
 	}
 
@@ -283,7 +283,7 @@ elgg.normalize_url = function(url) {
 	}
 
 	// 'javascript:'
-	else if (url.indexOf('javascript:') === 0 || url.indexOf('mailto:') === 0 ) {
+	else if (url.indexOf('javascript:') === 0 || url.indexOf('mailto:') === 0) {
 		return url;
 	}
 
@@ -347,7 +347,7 @@ elgg.system_messages = function(msgs, delay, type) {
 
 	msgs.forEach(appendMessage);
 
-	if (type != 'error') {
+	if (type !== 'error') {
 		$(messages_html.join('')).appendTo(systemMessages)
 			.animate({opacity: '1.0'}, delay).fadeOut('slow');
 	} else {
@@ -451,14 +451,14 @@ elgg.parse_url = function(url, component, expand) {
 		results = {};
 
 	if (url.indexOf('mailto:') === 0) {
-		results['scheme'] = 'mailto';
-		results['path'] = url.replace('mailto:', '');
+		results.scheme = 'mailto';
+		results.path = url.replace('mailto:', '');
 		return results;
 	}
 
 	if (url.indexOf('javascript:') === 0) {
-		results['scheme'] = 'javascript';
-		results['path'] = url.replace('javascript:', '');
+		results.scheme = 'javascript';
+		results.path = url.replace('javascript:', '');
 		return results;
 	}
 
@@ -471,12 +471,12 @@ elgg.parse_url = function(url, component, expand) {
 		}
 	}
 
-	if (expand && typeof(results['query']) != 'undefined') {
-		results['query'] = elgg.parse_str(results['query']);
+	if (expand && typeof(results.query) !== 'undefined') {
+		results.query = elgg.parse_str(results.query);
 	}
 
 	if (component) {
-		if (typeof(results[component]) != 'undefined') {
+		if (typeof(results[component]) !== 'undefined') {
 			return results[component];
 		} else {
 			return false;
@@ -558,7 +558,7 @@ elgg.push_to_object_array = function(object, parent, value) {
 	elgg.assertTypeOf('string', parent);
 
 	if (!(object[parent] instanceof Array)) {
-		object[parent] = []
+		object[parent] = [];
 	}
 
 	if ($.inArray(value, object[parent]) < 0) {
@@ -579,6 +579,6 @@ elgg.is_in_object_array = function(object, parent, value) {
 	elgg.assertTypeOf('object', object);
 	elgg.assertTypeOf('string', parent);
 
-	return typeof(object[parent]) != 'undefined' && $.inArray(value, object[parent]) >= 0;
+	return typeof(object[parent]) !== 'undefined' && $.inArray(value, object[parent]) >= 0;
 };
 

@@ -1,3 +1,4 @@
+/*globals elgg*/
 /**
  * Provides session methods.
  */
@@ -10,14 +11,14 @@ elgg.provide('elgg.session');
  * @param {Object} options
  * 
  *  {number|Date} options[expires]
- * 	{string} options[path]
- * 	{string} options[domain]
- * 	{boolean} options[secure]
+ *  {string} options[path]
+ *  {string} options[domain]
+ *  {boolean} options[secure]
  * 
  * @return {string|undefined} The value of the cookie, if only name is specified. Undefined if no value set
  */
 elgg.session.cookie = function(name, value, options) {
-	var cookies = [], cookie = [], i = 0, date, valid = true;
+	var cookies = [], cookie = [], i = 0, date;
 	
 	//elgg.session.cookie()
 	if (elgg.isUndefined(name)) {

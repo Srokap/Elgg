@@ -1,3 +1,4 @@
+/*globals elgg, $*/
 elgg.provide('elgg.ui.widgets');
 
 /**
@@ -9,7 +10,7 @@ elgg.provide('elgg.ui.widgets');
 elgg.ui.widgets.init = function() {
 
 	// widget layout?
-	if ($(".elgg-widgets").length == 0) {
+	if ($(".elgg-widgets").length === 0) {
 		return;
 	}
 
@@ -45,8 +46,8 @@ elgg.ui.widgets.add = function(event) {
 	var type = $(this).data('elgg-widget-type');
 
 	// if multiple instances not allow, disable this widget type add button
-	var multiple = $(this).attr('class').indexOf('elgg-widget-multiple') != -1;
-	if (multiple == false) {
+	var multiple = $(this).attr('class').indexOf('elgg-widget-multiple') !== -1;
+	if (multiple === false) {
 		$(this).addClass('elgg-state-unavailable');
 		$(this).removeClass('elgg-state-available');
 		$(this).unbind('click', elgg.ui.widgets.add);
@@ -107,7 +108,7 @@ elgg.ui.widgets.move = function(event, ui) {
  * @return void
  */
 elgg.ui.widgets.remove = function(event) {
-	if (confirm(elgg.echo('deleteconfirm')) == false) {
+	if (confirm(elgg.echo('deleteconfirm')) === false) {
 		event.preventDefault();
 		return;
 	}
@@ -115,11 +116,11 @@ elgg.ui.widgets.remove = function(event) {
 	var $widget = $(this).closest('.elgg-module-widget');
 
 	// if widget type is single instance type, enable the add buton
-	var type = $(this).data('elgg-widget-type')
-	$container = $(this).parents('.elgg-layout-widgets').first();
-	$button = $('[data-elgg-widget-type="' + type + '"]', $container);
-	var multiple = $button.attr('class').indexOf('elgg-widget-multiple') != -1;
-	if (multiple == false) {
+	var type = $(this).data('elgg-widget-type');
+	var $container = $(this).parents('.elgg-layout-widgets').first();
+	var $button = $('[data-elgg-widget-type="' + type + '"]', $container);
+	var multiple = $button.attr('class').indexOf('elgg-widget-multiple') !== -1;
+	if (multiple === false) {
 		$button.addClass('elgg-state-available');
 		$button.removeClass('elgg-state-unavailable');
 		$button.unbind('click', elgg.ui.widgets.add); // make sure we don't bind twice
@@ -173,7 +174,7 @@ elgg.ui.widgets.saveSettings = function(event) {
 		data: $(this).serialize(),
 		success: function(json) {
 			$widgetContent.html(json.output);
-			if (typeof(json.title) != "undefined") {
+			if (typeof(json.title) !== "undefined") {
 				var $widgetTitle = $widgetContent.parent().parent().find('.elgg-widget-title');
 				$widgetTitle.html(json.title);
 			}

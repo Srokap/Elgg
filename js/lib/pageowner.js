@@ -1,3 +1,4 @@
+/*globals elgg*/
 /**
  * Provides page owner and context functions
  *

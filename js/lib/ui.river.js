@@ -1,3 +1,4 @@
+/*globals elgg, $*/
 elgg.provide('elgg.ui.river');
 
 elgg.ui.river.init = function() {

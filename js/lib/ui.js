@@ -1,3 +1,4 @@
+/*globals elgg, $*/
 elgg.provide('elgg.ui');
 
 elgg.ui.init = function () {
@@ -193,7 +194,7 @@ elgg.ui.initHoverMenu = function(parent) {
 		}
 
 		// close hovermenu if arrow is clicked & menu already open
-		if ($hovermenu.css('display') == "block") {
+		if ($hovermenu.css('display') === "block") {
 			$hovermenu.fadeOut();
 		} else {
 			$avatar = $(this).closest(".elgg-avatar");
@@ -216,7 +217,7 @@ elgg.ui.initHoverMenu = function(parent) {
 
 	// hide avatar menu when user clicks elsewhere
 	$(document).click(function(event) {
-		if ($(event.target).parents(".elgg-avatar").length == 0) {
+		if ($(event.target).parents(".elgg-avatar").length === 0) {
 			$(".elgg-menu-hover").fadeOut();
 		}
 	});
@@ -246,7 +247,7 @@ elgg.ui.requiresConfirmation = function(e) {
  * @return {Object}
  */
 elgg.ui.loginHandler = function(hook, type, params, options) {
-	if (params.target.attr('id') == 'login-dropdown-box') {
+	if (params.target.attr('id') === 'login-dropdown-box') {
 		options.my = 'right top';
 		options.at = 'right bottom';
 		return options;
@@ -285,11 +286,11 @@ elgg.ui.initDatePicker = function() {
 		});
 	};
 	
-	if ($('.elgg-input-date').length && elgg.get_language() == 'en') {
+	if ($('.elgg-input-date').length && elgg.get_language() === 'en') {
 		loadDatePicker();
 	} else if ($('.elgg-input-date').length) {
 		elgg.get({
-			url: elgg.config.wwwroot + 'vendors/jquery/i18n/jquery.ui.datepicker-'+ elgg.get_language() +'.js',
+			url: elgg.config.wwwroot + 'vendors/jquery/i18n/jquery.ui.datepicker-' + elgg.get_language() + '.js',
 			dataType: "script",
 			cache: true,
 			success: loadDatePicker,
@@ -375,7 +376,7 @@ elgg.ui.initAccessInputs = function () {
 	$('.elgg-input-access').each(function () {
 		function updateMembersonlyNote() {
 			var val = $select.val();
-			if (val != acl && val != 0) {
+			if (val !== acl && val !== 0) {
 				// .show() failed in Chrome. Maybe a float/jQuery bug
 				$note.css('visibility', 'visible');
 			} else {

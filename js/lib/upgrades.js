@@ -1,3 +1,4 @@
+/*globals elgg, $*/
 /**
  * Provides functions for site upgrades performed through AJAX
  */

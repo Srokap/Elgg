@@ -1,4 +1,4 @@
-/*globals vsprintf*/
+/* globals elgg, vsprintf */
 /**
  * Provides language-related functionality
  */

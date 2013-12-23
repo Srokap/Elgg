@@ -189,7 +189,7 @@ elgg.action = function(action, options) {
 
 	// This is a misuse of elgg.security.addToken() because it is not always a
 	// full query string with a ?. As such we need a special check for the tokens.
-	if (!elgg.isString(options.data) || options.data.indexOf('__elgg_ts') == -1) {
+	if (!elgg.isString(options.data) || options.data.indexOf('__elgg_ts') === -1) {
 		options.data = elgg.security.addToken(options.data);
 	}
 	options.dataType = 'json';
