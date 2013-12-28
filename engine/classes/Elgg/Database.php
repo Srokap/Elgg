@@ -321,6 +321,7 @@ class Elgg_Database {
 					$return[] = $row;
 				}
 			}
+			mysql_free_result($result);
 		}
 
 		if (empty($return)) {
