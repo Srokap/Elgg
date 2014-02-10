@@ -1071,3 +1071,163 @@ function groups_run_upgrades() {
 		include "$path{$file}";
 	}
 }
+
+/**
+ * Allow group owner and discussion owner to edit discussion replies.
+ * 
+ * @param string  $hook   'permissions_check'
+ * @param string  $type   'object'
+ * @param boolean $return
+ * @param array   $params Array('entity' => ElggEntity, 'user' => ElggUser)
+ * @return boolean True if user is discussion or group owner
+ */
+function discussion_can_edit_reply($hook, $type, $return, $params) {
+	/** @var $reply ElggEntity */
+	$reply = $params['entity'];
+	$user = $params['user'];
+
+	if (!elgg_instanceof($reply, 'object', 'discussion_reply', 'ElggDiscussionReply')) {
+		return $return;
+	}
+
+	$discussion = $reply->getContainerEntity();
+	if ($discussion->owner_guid == $user->guid) {
+		return true;
+	}
+
+	$group = $discussion->getContainerEntity();
+	if (elgg_instanceof($group, 'group') && $group->owner_guid == $user->guid) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Allow group members to post to a group discussion
+ * 
+ * @param string $hook   'container_permissions_check'
+ * @param string $type   'object'
+ * @param array  $return
+ * @param array  $params Array with container, user and subtype
+ * @return boolean $return
+ */
+function discussion_reply_container_permissions_override($hook, $type, $return, $params) {
+	/** @var $container ElggEntity */
+	$container = $params['container'];
+	$user = $params['user'];
+
+	if (elgg_instanceof($container, 'object', 'groupforumtopic')) {
+		$group = $container->getContainerEntity();
+
+		if ($group->canWriteToContainer($user->guid) && $params['subtype'] === 'discussion_reply') {
+			return true;
+		}
+	}
+
+	return $return;
+}
+
+/**
+ * Update access_id of discussion replies when topic access_id is updated.
+ * 
+ * @param string     $event  'update'
+ * @param string     $type   'object'
+ * @param ElggObject $object ElggObject
+ */
+function discussion_update_reply_access_ids($event, $type, $object) {
+	if (elgg_instanceof($object, 'object', 'groupforumtopic')) {
+		$options = array(
+			'type' => 'object',
+			'subtype' => 'discussion_reply',
+			'container_guid' => $object->getGUID(),
+			'limit' => 0,
+		);
+		$batch = new ElggBatch('elgg_get_entities', $options);
+		foreach ($batch as $reply) {
+			if ($reply->access_id == $object->access_id) {
+				// Assume access_id of the replies is up-to-date
+				break;
+			}
+
+			// Update reply access_id
+			$reply->access_id = $object->access_id;
+			$reply->save();
+		}
+	}
+}
+
+/**
+ * Set up discussion reply entity menu
+ * 
+ * @param string          $hook   'register'
+ * @param string          $type   'menu:entity'
+ * @param ElggMenuItem[]  $return
+ * @param array           $params
+ * @return ElggMenuItem[] $return
+ */
+function discussion_reply_menu_setup($hook, $type, $return, $params) {
+	if (isset($params['handler']) && $params['handler'] !== 'discussion_reply') {
+		return $return;
+	}
+
+	if (!elgg_is_logged_in()) {
+		return $return;
+	}
+
+	if (elgg_in_context('widgets')) {
+		return $return;
+	}
+
+	// Reply has the same access as the topic so no need to view it
+	$remove = array('access');
+
+	/** @var $reply ElggEntity */
+	$reply = $params['entity'];
+
+	$user = elgg_get_logged_in_user_entity();
+
+	// Allow discussion topic owner, group owner and admins to edit and delete
+	if ($reply->canEdit() && !elgg_in_context('activity')) {
+		$return[] = ElggMenuItem::factory(array(
+			'name' => 'edit',
+			'text' => elgg_echo('edit'),
+			'href' => "discussion/reply/edit/{$reply->guid}",
+			'priority' => 150,
+		));
+
+		$return[] = ElggMenuItem::factory(array(
+			'name' => 'delete',
+			'text' => elgg_view_icon('delete'),
+			'href' => "action/discussion/reply/delete?guid={$reply->guid}",
+			'priority' => 150,
+			'is_action' => true,
+			'confirm' => elgg_echo('deleteconfirm'),
+		));
+	} else {
+		// Edit and delete links can be removed from all other users
+		$remove[] = 'edit';
+		$remove[] = 'delete';
+	}
+
+	// Remove unneeded menu items
+	foreach ($return as $key => $item) {
+		if (in_array($item->getName(), $remove)) {
+			unset($return[$key]);
+		}
+	}
+
+	return $return;
+}
+
+
+/**
+ * Runs unit tests for groups
+ *
+ * @return array
+ */
+function groups_test($hook, $type, $value, $params) {
+	global $CONFIG;
+	$value[] = $CONFIG->pluginspath . 'groups/tests/write_access.php';
+	return $value;
+}
