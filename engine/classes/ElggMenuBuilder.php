@@ -82,7 +82,7 @@ class ElggMenuBuilder {
 
 	/**
 	 * Group the menu items into sections
-	 * 
+	 *
 	 * @return void
 	 */
 	protected function setupSections() {
@@ -263,7 +263,7 @@ class ElggMenuBuilder {
 		$an = $a->getName();
 		$bn = $b->getName();
 
-		$result = strcmp($an, $bn);
+		$result = strnatcmp($an, $bn);
 		if ($result === 0) {
 			return $a->getData('original_order') - $b->getData('original_order');
 		}
