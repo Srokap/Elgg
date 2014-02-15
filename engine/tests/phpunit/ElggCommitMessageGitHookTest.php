@@ -75,11 +75,7 @@ class ElggCommitMessageGitHookTest extends PHPUnit_Framework_TestCase {
 	protected function runCmd($cmd, $return_output = false) {
 		$output = array();
 		$exit = 0;
-		exec($cmd, $output, $exit);
-
-		if ($return_output) {
-			return implode("\n", $output);
-		}
+		passthru($cmd, $exit);
 
 		return $exit > 0 ? false : true;
 	}

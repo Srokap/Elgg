@@ -8,6 +8,7 @@ php:
 branches:
   only:
     - master
+    - commit_validation
 
 matrix:
   include:
