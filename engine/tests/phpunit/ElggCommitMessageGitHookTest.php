@@ -35,35 +35,42 @@ class ElggCommitMessageGitHookTest extends PHPUnit_Framework_TestCase {
 	public function testInvalidInputs() {
 		// have to pass an empty arg because it looks for stdin
 		$cmd = "$this->validateScript ''";
-		$this->assertFalse($this->runCmd($cmd));
+		$result = $this->runCmd($cmd, $output);
+		$this->assertFalse($result, $output);
 
 		$cmd = "$this->validateScript /dev/null";
-		$this->assertFalse($this->runCmd($cmd));
+		$result = $this->runCmd($cmd, $output);
+		$this->assertFalse($result, $output);
 
 		$cmd = "echo '' | $this->validateScript";
-		$this->assertFalse($this->runCmd($cmd));
+		$result = $this->runCmd($cmd, $output);
+		$this->assertFalse($result, $output);
 	}
 
 	public function testInvalidMessage() {
 		$cmd = "$this->validateScript {$this->filesDir}invalid_format.txt";
-		$this->assertFalse($this->runCmd($cmd));
+		$result = $this->runCmd($cmd, $output);
+		$this->assertFalse($result, $output);
 	}
 
 	public function testFile() {
 		$cmd = "$this->validateScript {$this->filesDir}valid.txt";
-		$this->assertTrue($this->runCmd($cmd));
+		$result = $this->runCmd($cmd, $output);
+		$this->assertTrue($result, $output);
 	}
 	
 	public function testPipe() {
 		$msg = escapeshellarg(file_get_contents("{$this->filesDir}valid.txt"));
 		$cmd = "echo $msg | $this->validateScript";
-		$this->assertTrue($this->runCmd($cmd));
+		$result = $this->runCmd($cmd, $output);
+		$this->assertTrue($result, $output);
 	}
 
 	public function testArg() {
 		$msg = escapeshellarg(file_get_contents("{$this->filesDir}valid.txt"));
 		$cmd = "$this->validateScript $msg";
-		$this->assertTrue($this->runCmd($cmd));
+		$result = $this->runCmd($cmd, $output);
+		$this->assertTrue($result, $output);
 	}
 
 	/**
@@ -72,10 +79,12 @@ class ElggCommitMessageGitHookTest extends PHPUnit_Framework_TestCase {
 	 * 
 	 * @param string $cmd
 	 */
-	protected function runCmd($cmd, $return_output = false) {
+	protected function runCmd($cmd, &$output) {
 		$output = array();
 		$exit = 0;
-		passthru($cmd, $exit);
+		exec($cmd, $output, $exit);
+
+		$output = implode("\n", $output);
 
 		return $exit > 0 ? false : true;
 	}
