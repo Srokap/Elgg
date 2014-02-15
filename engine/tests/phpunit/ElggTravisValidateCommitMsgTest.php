@@ -76,8 +76,10 @@ class ElggTravisValidateCommitMsgTest extends ElggCommitMessageGitHookTest {
 	public function testFailingCommit() {
 		// https://github.com/Elgg/Elgg/commit/8f420a15d8fe567d78dca0ee97bc71305842c995
 		$sha = '8f420a15d8fe567d78dca0ee97bc71305842c995';
-		$cmd = "TRAVIS_COMMIT='$sha' bash {$this->travisScript}";
-		$result = $this->runCmd($cmd, $output);
+		$cmd = "bash {$this->travisScript}";
+		$result = $this->runCmd($cmd, $output, array(
+			'TRAVIS_COMMIT' => $sha,
+		));
 		$this->assertFalse($result, $output);
 	}
 

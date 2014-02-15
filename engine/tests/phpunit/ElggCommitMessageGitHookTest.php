@@ -79,12 +79,23 @@ class ElggCommitMessageGitHookTest extends PHPUnit_Framework_TestCase {
 	 * 
 	 * @param string $cmd
 	 */
-	protected function runCmd($cmd, &$output) {
-		$output = array();
-		$exit = 0;
-		exec($cmd, $output, $exit);
+	protected function runCmd($cmd, &$output, array $env = array()) {
+		$descriptorspec = array(
+			0 => array("pipe", "r"),// stdin
+			1 => array("pipe", "w"),// stdout
+			2 => array("pipe", "w"),// stderr
+		);
+		$defaultEnv = array(
+			'PATH' => getenv('PATH'),
+		);
+		$env = array_merge($defaultEnv, $env);
+		$process = proc_open($cmd, $descriptorspec, $pipes, null, $env);
+		$this->assertTrue(is_resource($process));
 
-		$output = implode("\n", $output);
+		// unfortunately we separate errors from output, but it should be good enough for current usage
+		$output = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+
+		$exit = proc_close($process);
 
 		return $exit > 0 ? false : true;
 	}
