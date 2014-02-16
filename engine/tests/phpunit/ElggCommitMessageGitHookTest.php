@@ -76,8 +76,11 @@ class ElggCommitMessageGitHookTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * Executes a command and returns true if the cmd
 	 * exited with 0.
-	 * 
-	 * @param string $cmd
+	 *
+	 * @param string $cmd    Shell command to execute
+	 * @param string $output Output from stdout and stderr will be written to this variable
+	 * @param array  $env    Array of environment variables to be passed to sub-process
+	 * @return bool Result depending on process exit code.
 	 */
 	protected function runCmd($cmd, &$output, array $env = array()) {
 		$descriptorspec = array(
@@ -86,9 +89,10 @@ class ElggCommitMessageGitHookTest extends PHPUnit_Framework_TestCase {
 			2 => array("pipe", "w"),// stderr
 		);
 		$defaultEnv = array(
-			'PATH' => getenv('PATH'),
+			'PATH' => getenv('PATH'),// we need to copy PATH variable to run php without specifying absolute path
 		);
 		$env = array_merge($defaultEnv, $env);
+
 		$process = proc_open($cmd, $descriptorspec, $pipes, null, $env);
 		$this->assertTrue(is_resource($process));
 
