@@ -1,0 +1,18 @@
+{
+  "type": "project",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://composer.i.srokap.pl"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "tidypics/tidypics": "1.8.0-rc1",
+	  "ihayredinov/hypeportfolio": "1.8.5",
+    "srokap/db_backup": "~1.2"
+  },
+  "provide": {
+    "elgg/elgg": "1.8.19"
+  }
+}

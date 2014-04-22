@@ -1,0 +1,172 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "5c3f019b87ea180e66b7cb5bbee4b32b",
+    "packages": [
+        {
+            "name": "composer/installers",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/installers.git",
+                "reference": "df19b48f557987e0a9bddff0c12dde37d5bcb757"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/installers/zipball/df19b48f557987e0a9bddff0c12dde37d5bcb757",
+                "reference": "df19b48f557987e0a9bddff0c12dde37d5bcb757",
+                "shasum": ""
+            },
+            "replace": {
+                "shama/baton": "*"
+            },
+            "require-dev": {
+                "composer/composer": "1.0.*@dev",
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "composer-installer",
+            "extra": {
+                "class": "Composer\\Installers\\Installer",
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Composer\\Installers\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kyle Robinson Young",
+                    "email": "kyle@dontkry.com",
+                    "homepage": "http://dontkry.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A multi-framework Composer library installer",
+            "homepage": "http://composer.github.com/installers/",
+            "keywords": [
+                "Craft",
+                "Hurad",
+                "MODX Evo",
+                "OXID",
+                "WolfCMS",
+                "agl",
+                "annotatecms",
+                "cakephp",
+                "codeigniter",
+                "concrete5",
+                "croogo",
+                "drupal",
+                "elgg",
+                "fuelphp",
+                "installer",
+                "joomla",
+                "kohana",
+                "laravel",
+                "lithium",
+                "magento",
+                "mako",
+                "mediawiki",
+                "modulework",
+                "phpbb",
+                "piwik",
+                "ppi",
+                "shopware",
+                "silverstripe",
+                "symfony",
+                "typo3",
+                "wordpress",
+                "zend",
+                "zikula"
+            ],
+            "time": "2014-04-15 03:26:48"
+        },
+        {
+            "name": "ihayredinov/hypePortfolio",
+            "version": "1.8.5",
+            "dist": {
+                "type": "zip",
+                "url": "http://community.elgg.org/plugins/download/837772",
+                "reference": null,
+                "shasum": null
+            },
+            "require": {
+                "composer/installers": ">=1.0.8"
+            },
+            "type": "elgg-plugin",
+            "authors": [
+                {
+                    "name": "Ismayil Khayredinov",
+                    "homepage": "http://community.elgg.org/profile/ihayredinov",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "AJAXed resume and portfolio builder",
+            "homepage": "http://hypeJunction.com"
+        },
+        {
+            "name": "srokap/db_backup",
+            "version": "1.2",
+            "dist": {
+                "type": "zip",
+                "url": "http://community.elgg.org/plugins/download/1330456",
+                "reference": null,
+                "shasum": null
+            },
+            "require": {
+                "composer/installers": ">=1.0.8",
+                "elgg/elgg": "~1.9|~1.8"
+            },
+            "type": "elgg-plugin",
+            "authors": [
+                {
+                    "name": "Paweł Sroka",
+                    "homepage": "http://community.elgg.org/profile/srokap",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Allows creating and restoring MySQL database backups",
+            "homepage": "https://srokap.pl"
+        },
+        {
+            "name": "tidypics/tidypics",
+            "version": "1.8.0-rc1",
+            "dist": {
+                "type": "zip",
+                "url": "http://community.elgg.org/plugins/download/978042",
+                "reference": null,
+                "shasum": null
+            },
+            "require": {
+                "composer/installers": ">=1.0.8"
+            },
+            "type": "elgg-plugin",
+            "description": "Full-featured Photo Gallery plugin",
+            "homepage": "http://community.elgg.org/plugins/385077/1.8.0%20rc1/tidypics-photo-gallery-plugin"
+        }
+    ],
+    "packages-dev": [
+
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": [
+
+    ],
+    "platform": [
+
+    ],
+    "platform-dev": [
+
+    ]
+}
