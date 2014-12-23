@@ -55,7 +55,13 @@ matrix:
     # End to end tests
     - php: 5.6
       env: E2E=true
+      before_install:
+        - "export DISPLAY=:99.0"
+        - "sh -e /etc/init.d/xvfb start"
       install:
+       - "wget http://selenium-release.storage.googleapis.com/2.44/selenium-server-standalone-2.44.0.jar"
+       - "java -jar selenium-server-standalone-2.44.0.jar > /dev/null &"
+       - sleep 3 # wait for Selenium server to start
        - composer install
        - mysql -e 'create database elgg;'
        - echo "USE mysql; UPDATE user SET password=PASSWORD('password') WHERE user='root'; FLUSH PRIVILEGES;" | mysql -u root
@@ -65,6 +71,7 @@ matrix:
        - sleep 3 # give Web server some time to bind to sockets, etc
       script:
        - curl -o - http://localhost:8888/ | grep "<title>Elgg Travis Site</title>"
+       - phpunit engine/tests/phpunit/Elgg/E2E
 
 services: 
  - mysql

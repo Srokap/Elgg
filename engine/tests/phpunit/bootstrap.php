@@ -16,6 +16,7 @@ $CONFIG = (object) array(
 	'boot_complete' => false,
 	'wwwroot' => 'http://localhost/',
 	'site_guid' => 1,
+	'path' => dirname(dirname(dirname(dirname(__FILE__)))) . '/',
 );
 
 require_once "$engine/load.php";
